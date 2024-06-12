@@ -19,9 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     Column(
@@ -48,7 +49,7 @@ fun LoginScreen() {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = {navController.navigate("signup")}, modifier = Modifier.fillMaxWidth()) {
             Text(text = "Login")
         }
     }
