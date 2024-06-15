@@ -16,18 +16,37 @@ import com.example.carguru.ui.screens.SignUpScreen
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.navigation.compose.rememberNavController
+import com.example.carguru.data.model.User
+import com.example.carguru.ui.screens.CarList
+import com.example.carguru.ui.screens.HomeScreen
+import com.example.carguru.ui.screens.ProfileScreen
+import com.example.carguru.ui.screens.ReviewScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             CarGuruTheme {
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "login") {
-                    composable("login") { LoginScreen(navController) }
-                    composable("signup") { SignUpScreen(navController) }
-                }
-                // A surface container using the 'background' color from the theme
+//                val navController = rememberNavController()
+//                NavHost(navController = navController, startDestination = "login") {
+//                    composable("login") { LoginScreen(navController) }
+//                    composable("signup") { SignUpScreen(navController) }
+//                }
+//                CarList()
+//                ReviewScreen()
+                HomeScreen("yuval")
+
+//                ProfileScreen(
+//                    profile = User(
+//                        id = "sd",
+//                        username = "John Doe",
+//                        email = "john.doe@example.com",
+//                        password = "sdfcs",
+//                        birthdate = "20 jan 2001"
+//                    ),
+//                    onLogout = { /* Handle logout */ }
+//                )
+
             }
         }
     }
