@@ -1,4 +1,4 @@
-package com.example.carguru.views
+package com.example.carguru.ui.screens
 
 import android.app.Activity
 import androidx.activity.ComponentActivity
