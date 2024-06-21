@@ -21,7 +21,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoginScreen() {
+fun sdfdsf() {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     Column(
