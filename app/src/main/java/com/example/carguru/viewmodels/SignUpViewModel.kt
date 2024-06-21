@@ -102,7 +102,7 @@ class SignUpViewModel : ViewModel() {
             name,
             password,
             email,
-            Date().toString()
+            birthdate
         )
         firestore.collection("users").document(user.uid)
             .set(userDetails)
