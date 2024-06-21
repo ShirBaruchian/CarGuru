@@ -49,8 +49,14 @@ fun LoginScreen(navController: NavHostController) {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        Button(onClick = {navController.navigate("signup")}, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = {navController.navigate("main")}, modifier = Modifier.fillMaxWidth()) {
             Text(text = "Login")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {navController.navigate("signup")}, modifier = Modifier.fillMaxWidth()) {
+            Text(text = "Signup")
         }
     }
 }

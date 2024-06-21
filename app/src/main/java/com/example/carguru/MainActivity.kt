@@ -1,5 +1,6 @@
 package com.example.carguru
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Text
@@ -17,40 +18,97 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.navigation.compose.rememberNavController
 import com.example.carguru.data.model.User
-import com.example.carguru.ui.screens.CarList
-import com.example.carguru.ui.screens.HomeScreen
+//import com.example.carguru.ui.screens.CarScreen
 import com.example.carguru.ui.screens.ProfileScreen
 import com.example.carguru.ui.screens.ReviewScreen
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import services.CarMake
+import services.CarViewModel
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.carguru.ui.screens.CarScreen
+import com.example.carguru.ui.screens.DropdownMenu
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+//            MaterialTheme {
+//                CarMakeListScreen()
+//            }
             CarGuruTheme {
-//                val navController = rememberNavController()
-//                NavHost(navController = navController, startDestination = "login") {
-//                    composable("login") { LoginScreen(navController) }
-//                    composable("signup") { SignUpScreen(navController) }
-//                }
+                val viewModel: CarViewModel = viewModel()
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") { LoginScreen(navController) }
+                    composable("signup") { SignUpScreen(navController) }
+                    composable("main") { CarScreen(viewModel) }
+                    composable("profile") { ProfileScreen(navController,
+                        User(
+                        id = "sd",
+                        username = "John Doe",
+                        email = "john.doe@example.com",
+                        password = "sdfcs",
+                        birthdate = "20 jan 2001"
+                        ),
+                        onLogout = { /* Handle logout */ })
+                    }
+                    composable("review") { ReviewScreen(navController) }
+                }
 //                CarList()
 //                ReviewScreen()
-                HomeScreen("yuval")
-
-//                ProfileScreen(
-//                    profile = User(
-//                        id = "sd",
-//                        username = "John Doe",
-//                        email = "john.doe@example.com",
-//                        password = "sdfcs",
-//                        birthdate = "20 jan 2001"
-//                    ),
-//                    onLogout = { /* Handle logout */ }
-//                )
-
             }
         }
     }
 }
+//
+//@Composable
+//fun CarMakeListScreen(viewModel: CarViewModel = viewModel()) {
+//    val carYears by viewModel.carYears.observeAsState(emptyList())
+////    val carMakes by viewModel.carMakes.observeAsState(emptyList())
+//
+////    val carMakeNames = carMakes.map { it.make_display }
+//
+////    var selectedMake by remember { mutableStateOf("") }
+//    var selectedYear by remember { mutableStateOf("") }
+//
+//    Column {
+////        DropdownMenu(
+////            label = "Make",
+////            options = carMakeNames,
+////            selectedOption = selectedMake,
+////            onOptionSelected = { selectedMake = it }
+////        )
+//
+//        DropdownMenu(
+//            label = "Year",
+//            options = carYears.map { it.toString() },
+//            selectedOption = selectedYear,
+//            onOptionSelected = { selectedYear = it }
+//        )
+//
+//
+//
+//        // Display the selected make and year
+////        Text(
+////            text = "Selected Car Make: $selectedMake",
+////            modifier = Modifier.padding(16.dp)
+////        )
+////        DropdownMenu(label = "Manufacturer", options = listOf("Toyota"), selectedOption = viewModel.selectedManufacturer) {
+////            viewModel.selectedManufacturer = it
+////        }
+//        Text(
+//            text = "Selected Car Year: $selectedYear",
+//            modifier = Modifier.padding(16.dp)
+//        )
+//    }
+//}
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -67,3 +125,44 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+
+
+//@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+//@Composable
+//fun CarMakeListScreen(viewModel: CarMakeViewModel = viewModel()) {
+//    val carMakes by remember { mutableStateOf(viewModel.carMakes) }
+//
+//    Scaffold(
+//        topBar = {
+//            TopAppBar(title = { Text("Car Makes") })
+//        }
+//    ) {
+//        CarMakeList(carMakes = carMakes)
+//    }
+//}
+
+//@Composable
+//fun CarMakeList(carMakes: List<CarMake>) {
+//    LazyColumn(
+//        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+//        verticalArrangement = Arrangement.spacedBy(8.dp)
+//    ) {
+//        items(carMakes) { carMake ->
+//            CarMakeItem(carMake)
+//        }
+//    }
+//}
+//
+//@Composable
+//fun CarMakeItem(carMake: CarMake) {
+//    Card(
+//        modifier = Modifier.fillMaxWidth(),
+//        elevation = 4.dp
+//    ) {
+//        Column(
+//            modifier = Modifier.padding(16.dp)
+//        ) {
+//            Text(text = carMake.makeDisplay, style = MaterialTheme.typography.bodySmall)
+//        }
+//    }
+//}
