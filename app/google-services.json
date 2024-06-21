@@ -12,7 +12,20 @@
           "package_name": "com.example.carguru"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1066537688999-u7frsqsmpu86oilvoi2mejl0obh5l0ou.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.carguru",
+            "certificate_hash": "5c84d53c3f586559444e5a34da1d7f9943906611"
+          }
+        },
+        {
+          "client_id": "1066537688999-42462c68lv0fo78meetmos22e3r5cgj1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAg6Pj9Y8F5R6MFZxBQy5MJmDxIdluI58U"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1066537688999-42462c68lv0fo78meetmos22e3r5cgj1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 class LoginViewModel(): ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
-
     var email: String by mutableStateOf("")
         private set
 
@@ -33,8 +32,16 @@ class LoginViewModel(): ViewModel() {
         // Implement login logic here
     }
 
-    fun signInWithGoogle(idToken: String) {
-
+    fun signInWithGoogle(idToken: String, onSuccess: () -> Unit){
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        firebaseAuth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess()
+                } else {
+                    // Sign-in failure
+                }
+            }
     }
 
     fun onFacebookLoginClick() {

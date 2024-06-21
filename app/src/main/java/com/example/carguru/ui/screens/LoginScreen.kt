@@ -2,6 +2,7 @@ package com.example.carguru.ui.screens
 
 import android.app.Activity
 import androidx.activity.ComponentActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -32,11 +33,30 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.carguru.R
 import com.example.carguru.viewmodels.LoginViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel) {
+fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
+    val context = LocalContext.current as Activity
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            account?.idToken?.let {
+                loginViewModel.signInWithGoogle(it) {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            }
+        } catch (e: ApiException) {
+            e.printStackTrace()
+        }
+    }
+
     Surface(
         color = MaterialTheme.colorScheme.background,
         modifier = Modifier.fillMaxSize()
@@ -82,7 +102,14 @@ fun LoginScreen(loginViewModel: LoginViewModel) {
                 Text(text = "Log in")
             }
             TextButton(
-                onClick = {},
+                onClick = {
+                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(context.getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build()
+                    val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
+                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
