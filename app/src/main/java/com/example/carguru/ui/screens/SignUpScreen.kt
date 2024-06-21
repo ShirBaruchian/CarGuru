@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.carguru.R
+import com.example.carguru.ui.components.DatePickerField
 import com.example.carguru.utils.hideKeyboard
 import com.example.carguru.viewmodels.SignUpViewModel
 
@@ -87,6 +88,12 @@ fun SignUpScreen(navController: NavController, signUpViewModel: SignUpViewModel)
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            DatePickerField(
+                label = "Birthdate",
+                selectedDate = signUpViewModel.birthdate,
+                onDateSelected = signUpViewModel::onBirthdateChange
             )
             OutlinedTextField(
                 value = signUpViewModel.password,

@@ -4,10 +4,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.carguru.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class SignUpViewModel : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
@@ -22,6 +27,9 @@ class SignUpViewModel : ViewModel() {
     var name: String by mutableStateOf("")
         private set
 
+    var birthdate: String by mutableStateOf("")
+        private set
+
     var errorMessage = mutableStateOf<String?>(null)
         private set
 
@@ -33,11 +41,35 @@ class SignUpViewModel : ViewModel() {
         password = newPassword
     }
 
+    fun onBirthdateChange(newBirthdate: String) {
+        birthdate = newBirthdate
+    }
+
     fun onNameChange(newName: String) {
         name = newName
     }
 
+    private fun isValidAge(birthdate: String): Boolean {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+        val birthDate: Date = sdf.parse(birthdate) ?: return false
+        val today = Calendar.getInstance()
+        val birthDay = Calendar.getInstance()
+        birthDay.time = birthDate
+
+        var age = today.get(Calendar.YEAR) - birthDay.get(Calendar.YEAR)
+        if (today.get(Calendar.DAY_OF_YEAR) < birthDay.get(Calendar.DAY_OF_YEAR)) {
+            age--
+        }
+
+        return age >= 18
+    }
+
     fun onSignUpClick(onSuccess: () -> Unit) {
+        if (!isValidAge(birthdate)) {
+            errorMessage.value = "You must be at least 18 years old to sign up."
+            return
+        }
+
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -65,11 +97,12 @@ class SignUpViewModel : ViewModel() {
     }
 
     private fun saveUserDetails(user: FirebaseUser, onSuccess: () -> Unit) {
-        val userDetails = hashMapOf(
-            "uid" to user.uid,
-            "name" to name,
-            "email" to email,
-            "password" to password
+        val userDetails = User(
+            user.uid,
+            name,
+            password,
+            email,
+            Date().toString()
         )
         firestore.collection("users").document(user.uid)
             .set(userDetails)
