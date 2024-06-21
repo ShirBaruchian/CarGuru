@@ -32,12 +32,14 @@ class LoginViewModel(): ViewModel() {
         // Implement login logic here
     }
 
-    fun signInWithGoogle(idToken: String, onSuccess: () -> Unit){
+    fun signInWithGoogle(idToken: String, onSuccess: (String) -> Unit){
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    onSuccess()
+                    val user = firebaseAuth.currentUser
+                    val displayName = user?.displayName ?: "User"
+                    onSuccess(displayName)
                 } else {
                     // Sign-in failure
                 }

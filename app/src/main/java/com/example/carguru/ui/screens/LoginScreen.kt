@@ -46,8 +46,8 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
         try {
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let {
-                loginViewModel.signInWithGoogle(it) {
-                    navController.navigate("home") {
+                loginViewModel.signInWithGoogle(it) { displayName ->
+                    navController.navigate("home/$displayName") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
@@ -108,7 +108,9 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                         .requestEmail()
                         .build()
                     val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
-                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                    googleSignInClient.signOut().addOnCompleteListener {
+                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

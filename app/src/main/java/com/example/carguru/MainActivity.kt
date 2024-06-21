@@ -56,8 +56,9 @@ fun AppNavigation(loginViewModel: LoginViewModel) {
         composable("login") {
             LoginScreen(navController = navController, loginViewModel = loginViewModel)
         }
-        composable("home") {
-            HomeScreen(userName = "User") // Pass actual user name if available
+        composable("home/{userName}") { backStackEntry ->
+            val userName = backStackEntry.arguments?.getString("userName") ?: "User"
+            HomeScreen(userName = userName) // Pass actual user name if available
         }
     }
 }
