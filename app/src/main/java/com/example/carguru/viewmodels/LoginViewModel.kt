@@ -20,6 +20,9 @@ class LoginViewModel(): ViewModel() {
     var password: String by mutableStateOf("")
         private set
 
+    var errorMessage = mutableStateOf<String?>(null)
+        private set
+
     fun onEmailChange(newEmail: String) {
         email = newEmail
     }
@@ -28,8 +31,15 @@ class LoginViewModel(): ViewModel() {
         password = newPassword
     }
 
-    fun onLoginClick() {
-        // Implement login logic here
+    fun onLoginClick(onSuccess: (String) -> Unit) {
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess(firebaseAuth.currentUser?.displayName ?: "User")
+                } else {
+                    errorMessage.value = task.exception?.message ?: "Log in failed"
+                }
+            }
     }
 
     fun signInWithGoogle(idToken: String, onSuccess: (String) -> Unit){
@@ -41,7 +51,7 @@ class LoginViewModel(): ViewModel() {
                     val displayName = user?.displayName ?: "User"
                     onSuccess(displayName)
                 } else {
-                    // Sign-in failure
+                    errorMessage.value = task.exception?.message ?: "Sign-In failed"
                 }
             }
     }
