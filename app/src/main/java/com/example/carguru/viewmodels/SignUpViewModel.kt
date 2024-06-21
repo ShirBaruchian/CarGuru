@@ -106,7 +106,12 @@ class SignUpViewModel : ViewModel() {
         )
         firestore.collection("users").document(user.uid)
             .set(userDetails)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> errorMessage.value = e.message ?: "Failed to save user details" }
+            .addOnCompleteListener{ task ->
+                if (task.isSuccessful) {
+                    onSuccess()
+                } else {
+                    errorMessage.value = task.exception?.message ?: "Failed to save user details"
+                }
+            }
     }
 }
