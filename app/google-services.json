@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1066537688999",
+    "project_id": "carguru-d696c",
+    "storage_bucket": "carguru-d696c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066537688999:android:83bcc020b1095b21812082",
+        "android_client_info": {
+          "package_name": "com.example.carguru"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg6Pj9Y8F5R6MFZxBQy5MJmDxIdluI58U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
