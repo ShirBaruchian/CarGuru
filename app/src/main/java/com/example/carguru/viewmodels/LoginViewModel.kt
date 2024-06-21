@@ -14,11 +14,13 @@ import kotlinx.coroutines.flow.StateFlow
 
 class LoginViewModel(): ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
-
     var email: String by mutableStateOf("")
         private set
 
     var password: String by mutableStateOf("")
+        private set
+
+    var errorMessage = mutableStateOf<String?>(null)
         private set
 
     fun onEmailChange(newEmail: String) {
@@ -29,12 +31,29 @@ class LoginViewModel(): ViewModel() {
         password = newPassword
     }
 
-    fun onLoginClick() {
-        // Implement login logic here
+    fun onLoginClick(onSuccess: (String) -> Unit) {
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess(firebaseAuth.currentUser?.displayName ?: "User")
+                } else {
+                    errorMessage.value = task.exception?.message ?: "Log in failed"
+                }
+            }
     }
 
-    fun signInWithGoogle(idToken: String) {
-
+    fun signInWithGoogle(idToken: String, onSuccess: (String) -> Unit){
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        firebaseAuth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = firebaseAuth.currentUser
+                    val displayName = user?.displayName ?: "User"
+                    onSuccess(displayName)
+                } else {
+                    errorMessage.value = task.exception?.message ?: "Sign-In failed"
+                }
+            }
     }
 
     fun onFacebookLoginClick() {
