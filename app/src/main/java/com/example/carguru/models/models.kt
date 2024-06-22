@@ -1,5 +1,8 @@
 package com.example.carguru.models
 
+import com.google.firebase.firestore.ServerTimestamp
+import java.util.Date
+
 data class CarDetails(
     val manufacturer: String = "",
     val model: String = "",
@@ -9,12 +12,15 @@ data class CarDetails(
 )
 
 data class Review(
-    val id: String,
-    val userId: String,
-    val title: String,
-    val carDetails: CarDetails = CarDetails(),
+    val title: String = "",
+    val manufacturer: String = "",
+    val model: String = "",
+    val year: String = "",
+    val trim: String = "",
     val rating: Int = 0,
-    val text: String
+    val text: String = "",
+    val userId: String = "",
+    @ServerTimestamp val timestamp: Date? = null
 )
 
 data class ReviewWithUser(

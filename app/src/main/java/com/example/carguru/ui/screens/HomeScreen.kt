@@ -81,31 +81,26 @@ fun HomeScreen(
 }
 
 @Composable
-fun ReviewItem(reviewWithUser: ReviewWithUser) {
+fun ReviewItem(review: ReviewWithUser) {
     Column(modifier = Modifier.padding(8.dp)) {
         Text(
-            text = reviewWithUser.review.title,
+            text = review.review.title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "By ${reviewWithUser.username}",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "${reviewWithUser.review.carDetails.manufacturer} ${reviewWithUser.review.carDetails.model} (${reviewWithUser.review.carDetails.year} ${reviewWithUser.review.carDetails.trim})",
+            text = "By ${review.review.manufacturer} ${review.review.model} (${review.review.year} ${review.review.trim})",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = reviewWithUser.review.text,
+            text = review.review.text,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
+        RatingBar(rating = review.review.rating) {}
     }
 }

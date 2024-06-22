@@ -30,7 +30,7 @@ class ReviewsViewModel : ViewModel() {
                 val reviews = if (reviewsSnapshot.isEmpty) {
                     emptyList()
                 } else {
-                    reviewsSnapshot.map { it.toObject(Review::class.java) }
+                    reviewsSnapshot.toObjects(Review::class.java)
                 }
 
                 val userIds = reviews.map { it.userId }.distinct()
@@ -38,7 +38,7 @@ class ReviewsViewModel : ViewModel() {
 
                 for (userId in userIds) {
                     val userSnapshot = firestore.collection("users").document(userId).get().await()
-                    val userName = userSnapshot.getString("name") ?: "Unknown"
+                    val userName = userSnapshot.getString("username") ?: "Unknown"
                     userMap[userId] = userName
                 }
 
@@ -48,6 +48,7 @@ class ReviewsViewModel : ViewModel() {
 
                 _reviews.value = reviewsWithUserNames
             } catch (e: Exception) {
+                val message = e.message ?: "Error fetching reviews"
                 // Handle the error, for example log it or update a separate error state
                 _reviews.value = emptyList()
             }
