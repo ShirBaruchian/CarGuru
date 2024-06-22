@@ -16,11 +16,15 @@ import com.example.carguru.ui.theme.CarGuruTheme
 import com.example.carguru.viewmodels.LoginViewModel
 import com.example.carguru.ui.screens.LoginScreen
 import com.example.carguru.ui.screens.SignUpScreen
+import com.example.carguru.viewmodels.ReviewsViewModel
 import com.example.carguru.viewmodels.SignUpViewModel
+import com.example.carguru.viewmodels.UserViewModel
 
 class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private val signUpViewModel: SignUpViewModel by viewModels()
+    private val reviewsViewModel: ReviewsViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -35,7 +39,7 @@ class MainActivity : ComponentActivity() {
 //                }
 //                CarList()
 //                ReviewScreen()
-                AppNavigation(loginViewModel, signUpViewModel)
+                AppNavigation(loginViewModel, signUpViewModel, reviewsViewModel, userViewModel)
 
 //                ProfileScreen(
 //                    profile = User(
@@ -54,18 +58,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel) {
+fun AppNavigation(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel,
+                  reviewsViewModel: ReviewsViewModel, userViewModel: UserViewModel) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
-            LoginScreen(navController = navController, loginViewModel = loginViewModel)
+            LoginScreen(navController = navController, loginViewModel = loginViewModel,
+                userViewModel = userViewModel)
         }
         composable("signup") {
             SignUpScreen(navController = navController, signUpViewModel = signUpViewModel)
         }
-        composable("home/{userName}") { backStackEntry ->
-            val userName = backStackEntry.arguments?.getString("userName") ?: "User"
-            HomeScreen(userName = userName) // Pass actual user name if available
+        composable("home") {
+            HomeScreen(navController = navController, reviewsViewModel = reviewsViewModel, userViewModel) // Pass actual user name if available
         }
     }
 }

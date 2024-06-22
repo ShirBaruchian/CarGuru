@@ -38,12 +38,15 @@ import androidx.navigation.NavController
 import com.example.carguru.R
 import com.example.carguru.utils.hideKeyboard
 import com.example.carguru.viewmodels.LoginViewModel
+import com.example.carguru.viewmodels.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
 @Composable
-fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
+fun LoginScreen(navController: NavController,
+                userViewModel: UserViewModel,
+                loginViewModel: LoginViewModel) {
     val context = LocalContext.current as Activity
     val focusManager = LocalFocusManager.current
 
@@ -52,9 +55,12 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
         try {
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let {
-                loginViewModel.signInWithGoogle(it) { displayName ->
-                    navController.navigate("home/$displayName") {
-                        popUpTo("login") { inclusive = true }
+                loginViewModel.signInWithGoogle(it) { isSuccessful ->
+                    if (isSuccessful) {
+                        userViewModel.fetchCurrentUser()
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     }
                 }
             }
@@ -62,6 +68,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
             e.printStackTrace()
         }
     }
+
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -113,9 +120,12 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     .padding(vertical = 8.dp)
             )
             Button(
-                onClick = { loginViewModel.onLoginClick() {displayName ->
-                    navController.navigate("home/$displayName") {
-                    popUpTo("login") { inclusive = true }
+                onClick = { loginViewModel.onLoginClick() {isSuccessful ->
+                    if (isSuccessful) {
+                        userViewModel.fetchCurrentUser()
+                        navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }} },
                 modifier = Modifier
                     .fillMaxWidth()
