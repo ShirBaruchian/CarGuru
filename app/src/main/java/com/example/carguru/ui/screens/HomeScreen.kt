@@ -1,204 +1,192 @@
 package com.example.carguru.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.carguru.data.model.Car
-import services.CarViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import com.example.carguru.services.CarRepository
 
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-//@Composable
-//fun CarScreen(navController: NavHostController) {
-//    val carViewModel: CarViewModel = viewModel()
-//    val carYears by carViewModel.carYears.observeAsState(emptyList())
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(title = { Text("Car Models") })
-//        }
-//    ) {
-//        Column(modifier = Modifier.padding(16.dp)) {
-//            var make by remember { mutableStateOf("") }
-//            OutlinedTextField(
-//                value = make,
-//                onValueChange = { make = it },
-//                label = { Text("Car Make") },
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Button(onClick = { carViewModel.fetchCarYears() }) {
-//                Text("Fetch Models")
-//            }
-//            Spacer(modifier = Modifier.height(16.dp))
-////            CarModelList(carYears)
-//        }
-//    }
-//
-//    val viewModel = remember { CarViewModel() }
-//    var selectedYear by remember { mutableStateOf("") }
-//
-//    Column(modifier = Modifier.padding(16.dp)) {
-//        // Dropdowns
-//        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-////            DropdownMenu(label = "Manufacturer", options = listOf("Toyota"), selectedOption = viewModel.selectedManufacturer) {
-////                viewModel.selectedManufacturer = it
-////            }
-////            DropdownMenu(label = "Model", options = listOf("Corolla"), selectedOption = viewModel.selectedModel) {
-////                viewModel.selectedModel = it
-////            }
-//            DropdownMenu(label = "Year", options = carYears, selectedOption = selectedYear) {
-//                selectedYear = it
-//            }
-//        }
-//
-////        Spacer(modifier = Modifier.height(16.dp))
-////
-////        // Car details
-////        Text(text = "${viewModel.selectedModel} - ${viewModel.selectedYear}")
-////        Text(text = carInfo)
-////
-////        Spacer(modifier = Modifier.height(16.dp))
-////
-////        // Trims
-////        Text(text = "Trim", style = MaterialTheme.typography.h6)
-////        LazyColumn {
-////            items(trims.size) { index ->
-////                TrimItem(trim = trims[index])
-////            }
-////        }
-//    }
-//}
-//
-////@Composable
-////fun DropdownMenu(label: String, items: List<String>, selectedItem: String, onItemSelected: (String) -> Unit) {
-////    var expanded by remember { mutableStateOf(false) }
-////    Box {
-////        Button(onClick = { expanded = true }) {
-////            Text(text = selectedItem)
-////        }
-////        DropdownMenu(
-////            expanded = expanded,
-////            onDismissRequest = { expanded = false }
-////        ) {
-////            items.forEach { item ->
-////                DropdownMenuItem(onClick = {
-////                    onItemSelected(item)
-////                    expanded = false
-////                }) {
-////                    Text(text = item)
-////                }
-////            }
-////        }
-////    }
-////}
-//
-////@Composable
-////fun TrimItem(trim: Trim) {
-////    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-////        Column(modifier = Modifier.padding(8.dp)) {
-////            Text(text = trim.name, style = MaterialTheme.typography.h6)
-////            Text(text = "Rating: ${trim.rating}")
-////            Text(text = "Reviews: ${trim.reviews}")
-////        }
-////    }
-////}
-//
-//@Composable
-//fun CarModelList(carModels: List<Car>) {
-//    LazyColumn {
-//        items(carModels) { carModel ->
-//            Card(modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 4.dp)) {
-//                Column(modifier = Modifier.padding(16.dp)) {
-////                    Text(text = "Model: ${carModel}")
-////                    Text(text = "Make: ${carModel.model_make_id}")
-//                    Text(text = "Year: ${carModel}")
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
-fun CarScreen(viewModel: CarViewModel = viewModel()) {
-    val years by viewModel.years
+fun CarScreen(viewModel: CarRepository = viewModel()) {
+    val years = remember { mutableStateOf<List<Int>>(emptyList()) }
+    var selectedYear by remember { mutableStateOf("") }
+    var expandedYear by remember { mutableStateOf(false) }
+    val makes = remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedMake by remember { mutableStateOf("") }
+    var expandedMake by remember { mutableStateOf(false) }
+    val models = remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedModel by remember { mutableStateOf("") }
+    var expandedModel by remember { mutableStateOf(false) }
+    val trims = remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedTrim by remember { mutableStateOf("") }
+    var expandedTrim by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-    val selectedItem by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            years.value = viewModel.getYears()
+        }
+    }
+
+    LaunchedEffect(selectedYear) {
+        if (selectedYear.isNotEmpty()) {
+            coroutineScope.launch {
+                makes.value = viewModel.getMakes(selectedYear.toInt())
+                selectedMake = ""  // Reset selected make when year changes
+            }
+        }
+    }
+
+    LaunchedEffect(selectedMake,selectedYear) {
+        if (selectedMake.isNotEmpty() && selectedYear.isNotEmpty()) {
+            coroutineScope.launch {
+                models.value = viewModel.getModels(selectedMake, selectedYear.toInt())
+                selectedModel = ""  // Reset selected model when make changes
+            }
+        }
+    }
+
+    LaunchedEffect(selectedModel,selectedMake,selectedYear) {
+        if (selectedModel.isNotEmpty() && selectedMake.isNotEmpty() && selectedYear.isNotEmpty()) {
+            coroutineScope.launch {
+                trims.value = viewModel.getTrims(selectedMake, selectedModel, selectedYear.toInt())
+                selectedTrim = ""  // Reset selected trim when model changes
+            }
+        }else{
+            selectedTrim = ""
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Home", style = MaterialTheme.typography.bodySmall)
+        Text("Home", style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(8.dp))
         Row {
-//            DropdownMenu("manufacturer", options = listOf("gy"), selectedOption = uh)
             Spacer(modifier = Modifier.width(8.dp))
-//            DropdownMenu("model",options = years, selectedOption = )
-            Spacer(modifier = Modifier.width(8.dp))
-            DropdownMenu("year", options = years, selectedOption = selectedItem){}
+            DropdownMenuField(
+                label = "Year",
+                options = years.value.map { it.toString() },
+                selectedOption = selectedYear,
+                expanded = expandedYear,
+                onOptionSelected = { selectedYear = it },
+                onExpandedChange = { expandedYear = it },
+                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Toyota Corolla - 2022", style = MaterialTheme.typography.bodySmall)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("details details details details details details details details")
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Trim", style = MaterialTheme.typography.bodySmall)
-        Spacer(modifier = Modifier.height(8.dp))
         Row {
-            TrimCard("SUN", 4.2f, 10)
             Spacer(modifier = Modifier.width(8.dp))
-            TrimCard("GLI", 4.1f, 42)
+            DropdownMenuField(
+                label = "Make",
+                options = makes.value,
+                selectedOption = selectedMake,
+                expanded = expandedMake,
+                onOptionSelected = { selectedMake = it },
+                onExpandedChange = { expandedMake = it },
+                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Row {
-            TrimCard("HYB", 3.9f, 11)
             Spacer(modifier = Modifier.width(8.dp))
-            TrimCard("EV", 5f, 16)
+            DropdownMenuField(
+                label = "Model",
+                options = models.value,
+                selectedOption = selectedModel,
+                expanded = expandedModel,
+                onOptionSelected = { selectedModel = it },
+                onExpandedChange = { expandedModel = it },
+                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        if (selectedMake.isNotEmpty() && selectedYear.isNotEmpty() && selectedModel.isNotEmpty()){
+            Text("${selectedMake} ${selectedModel} - ${selectedYear}", style = MaterialTheme.typography.bodyLarge)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        if (trims.value.isNotEmpty()) {
+            Text("Available Trims:", style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.height(8.dp))
+            trims.value.forEach { trim ->
+                TrimCard(name = trim, rating = 4.5f, reviews = 100)  // Mock ratings and reviews
+            }
+        } else if (selectedModel.isNotEmpty()) {
+            Text("No trims available for the selected make, model, and year.", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
 
-//@Composable
-//fun DropdownMenu(label: String, items: List<Int> = listOf()) {
-//    var expanded by remember { mutableStateOf(false) }
-//    var selectedItem by remember { mutableStateOf(label) }
-//
-//    Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-//        Text(
-//            text = selectedItem,
-//            modifier = Modifier
-//                .clickable(onClick = { expanded = true })
-//                .background(MaterialTheme.colors.surface)
-//                .padding(16.dp)
-//        )
-//        DropdownMenu(
-//            expanded = expanded,
-//            onDismissRequest = { expanded = false }
-//        ) {
-//            items.forEach { item ->
-//                DropdownMenuItem(onClick = {
-//                    selectedItem = item.toString()
-//                    expanded = false
-//                }) {
-//                    Text(text = item.toString())
-//                }
-//            }
-//        }
-//    }
-//}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownMenuField(
+    label: String,
+    options: List<String>,
+    selectedOption: String,
+    expanded: Boolean,
+    onOptionSelected: (String) -> Unit,
+    onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedOption,
+            onValueChange = {},
+            label = { Text(label) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onExpandedChange(true) },
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { onExpandedChange(!expanded) }
+                )
+            },
+            textStyle = LocalTextStyle.current.copy(fontSize = 14.sp)
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            option,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = 14.sp
+                        )
+                    },
+                    onClick = {
+                        onOptionSelected(option)
+                        onExpandedChange(false)
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun TrimCard(name: String, rating: Float, reviews: Int) {
@@ -212,7 +200,6 @@ fun TrimCard(name: String, rating: Float, reviews: Int) {
             Text(text = name, style = MaterialTheme.typography.bodySmall)
             Text(text = "$rating/5", style = MaterialTheme.typography.bodyMedium)
             Text(text = "$reviews Reviews", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "details details details details")
         }
     }
 }

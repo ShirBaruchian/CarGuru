@@ -27,12 +27,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
-import services.CarMake
-import services.CarViewModel
+//import services.CarMake
+//import services.CarViewModel
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.carguru.ui.screens.CarScreen
+//import com.example.carguru.ui.screens.CarQueryAPI
+//import com.example.carguru.ui.screens.CarScreen
 import com.example.carguru.ui.screens.DropdownMenu
+//import services.CarQueryViewModel
+import com.example.carguru.services.CarRepository
+//import services.CarViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,12 +47,14 @@ class MainActivity : ComponentActivity() {
 //                CarMakeListScreen()
 //            }
             CarGuruTheme {
-                val viewModel: CarViewModel = viewModel()
+                val viewModel: CarRepository = viewModel()
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "login") {
                     composable("login") { LoginScreen(navController) }
                     composable("signup") { SignUpScreen(navController) }
-                    composable("main") { CarScreen(viewModel) }
+                    composable("main") {
+                        CarScreen(viewModel)
+                    }
                     composable("profile") { ProfileScreen(navController,
                         User(
                         id = "sd",
