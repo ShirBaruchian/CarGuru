@@ -12,6 +12,7 @@ data class CarDetails(
 )
 
 data class Review(
+    val id: String = "",
     val title: String = "",
     val manufacturer: String = "",
     val model: String = "",

@@ -8,14 +8,17 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.carguru.ui.screens.AddReviewScreen
 import com.example.carguru.ui.screens.HomeScreen
 import com.example.carguru.ui.theme.CarGuruTheme
 import com.example.carguru.viewmodels.LoginViewModel
 import com.example.carguru.ui.screens.LoginScreen
+import com.example.carguru.ui.screens.ReviewDetailScreen
 import com.example.carguru.ui.screens.SignUpScreen
 import com.example.carguru.viewmodels.AddReviewViewModel
 import com.example.carguru.viewmodels.ReviewsViewModel
@@ -79,6 +82,13 @@ fun AppNavigation(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewMod
         }
         composable("addReview") {
             AddReviewScreen(navController = navController, addReviewViewModel = addReviewViewModel)
+        }
+        composable(
+            "reviewDetail/{reviewId}",
+            arguments = listOf(navArgument("reviewId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val reviewId = backStackEntry.arguments?.getString("reviewId") ?: return@composable
+            ReviewDetailScreen(navController = navController, reviewId = reviewId, reviewsViewModel = reviewsViewModel)
         }
     }
 }

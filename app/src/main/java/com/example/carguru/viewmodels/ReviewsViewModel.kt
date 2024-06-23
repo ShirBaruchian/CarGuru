@@ -6,8 +6,7 @@ import com.example.carguru.models.Review
 import com.example.carguru.models.ReviewWithUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -30,7 +29,9 @@ class ReviewsViewModel : ViewModel() {
                 val reviews = if (reviewsSnapshot.isEmpty) {
                     emptyList()
                 } else {
-                    reviewsSnapshot.toObjects(Review::class.java)
+                    reviewsSnapshot.documents.mapNotNull { document ->
+                        document.toObject(Review::class.java)?.copy(id = document.id)
+                    }
                 }
 
                 val userIds = reviews.map { it.userId }.distinct()
@@ -48,10 +49,15 @@ class ReviewsViewModel : ViewModel() {
 
                 _reviews.value = reviewsWithUserNames
             } catch (e: Exception) {
-                val message = e.message ?: "Error fetching reviews"
                 // Handle the error, for example log it or update a separate error state
                 _reviews.value = emptyList()
             }
         }
+    }
+
+    fun getReviewWithUser(reviewId: String): StateFlow<ReviewWithUser?> {
+        return _reviews.map { reviews ->
+            reviews.find { it.review.id == reviewId }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, null)
     }
 }

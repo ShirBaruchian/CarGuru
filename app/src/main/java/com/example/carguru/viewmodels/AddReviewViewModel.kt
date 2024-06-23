@@ -19,7 +19,9 @@ class AddReviewViewModel : ViewModel() {
             try {
                 val userId = auth.currentUser?.uid
                 if (userId != null) {
+                    val newReviewRef = firestore.collection("reviews").document()
                     val review = Review(
+                        id = newReviewRef.id,
                         userId = userId,
                         title = title,
                         manufacturer = manufacturer,
@@ -29,7 +31,7 @@ class AddReviewViewModel : ViewModel() {
                         rating = rating,
                         text = reviewText
                     )
-                    firestore.collection("reviews").add(review).await()
+                    newReviewRef.set(review).await()
                     callback(null)
                 }
             } catch (e: Exception) {
