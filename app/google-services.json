@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1066537688999",
+    "project_id": "carguru-d696c",
+    "storage_bucket": "carguru-d696c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066537688999:android:83bcc020b1095b21812082",
+        "android_client_info": {
+          "package_name": "com.example.carguru"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1066537688999-u7frsqsmpu86oilvoi2mejl0obh5l0ou.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.carguru",
+            "certificate_hash": "5c84d53c3f586559444e5a34da1d7f9943906611"
+          }
+        },
+        {
+          "client_id": "1066537688999-42462c68lv0fo78meetmos22e3r5cgj1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg6Pj9Y8F5R6MFZxBQy5MJmDxIdluI58U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1066537688999-42462c68lv0fo78meetmos22e3r5cgj1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

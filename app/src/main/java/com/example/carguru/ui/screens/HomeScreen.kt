@@ -1,25 +1,22 @@
 package com.example.carguru.ui.screens
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.example.carguru.services.CarRepository
 
 
 @Composable
-fun CarScreen(viewModel: CarRepository = viewModel()) {
+fun HomeScreen(userName: String,viewModel: CarRepository = viewModel()) {
     val years = remember { mutableStateOf<List<Int>>(emptyList()) }
     var selectedYear by remember { mutableStateOf("") }
     var expandedYear by remember { mutableStateOf(false) }
