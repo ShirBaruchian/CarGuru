@@ -24,6 +24,13 @@ data class Review(
     @ServerTimestamp val timestamp: Date? = null
 )
 
+data class User(
+    val id: String = "",
+    val username: String = "",
+    val email: String = "",
+    val password: String = ""
+)
+
 data class ReviewWithUser(
     val review: Review,
     val username: String
