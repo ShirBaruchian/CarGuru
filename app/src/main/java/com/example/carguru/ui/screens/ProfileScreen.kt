@@ -9,13 +9,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
 import com.example.carguru.data.model.User
 import androidx.compose.foundation.background
+import androidx.navigation.NavHostController
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(profile: User, onLogout: () -> Unit) {
+fun ProfileScreen(navController: NavHostController,profile: User, onLogout: () -> Unit) {
     var isEditMode by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf(profile.username) }
     var email by remember { mutableStateOf(profile.email) }
@@ -84,7 +85,7 @@ fun ProfileScreen(profile: User, onLogout: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
         Button(
-            onClick = onLogout,
+            onClick = {navController.navigate("main")},
             colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
             modifier = Modifier.fillMaxWidth()
         ) {

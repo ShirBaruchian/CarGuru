@@ -1,155 +1,222 @@
 package com.example.carguru.ui.screens
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
+import com.example.carguru.viewmodels.CarRepository
+import com.example.carguru.services.DropdownState
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
+
 
 @Composable
-fun HomeScreen(userName: String) {
-    var selectedManufacturer by remember { mutableStateOf("Manufacturer") }
-    var selectedModel by remember { mutableStateOf("Model") }
-    var selectedYear by remember { mutableStateOf("Year") }
+fun HomeScreen(navController: NavController, userName: String, viewModel: CarRepository = viewModel()) {
+    val yearsState = remember { DropdownState<Int>() }
+    val makesState = remember { DropdownState<String>() }
+    val modelsState = remember { DropdownState<String>() }
+    val trimsState = remember { DropdownState<String>() }
+    val coroutineScope = rememberCoroutineScope()
 
-    val manufacturers = listOf("Toyota", "Honda", "Ford")
-    val models = listOf("Corolla", "Civic", "Mustang")
-    val years = listOf("2022", "2021", "2020")
 
-    val trims = listOf(
-        Trim("SUN", 4.2, 10, "details details details details details"),
-        Trim("GLI", 4.1, 42, "details details details details details"),
-        Trim("HYB", 3.9, 11, "details details details details details"),
-        Trim("EV", 5.0, 16, "details details details details details")
-    )
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            yearsState.items.value = viewModel.getYears()
+        }
+    }
+
+    LaunchedEffect(yearsState.selected.value) {
+        if (yearsState.selected.value.isNotEmpty()) {
+            coroutineScope.launch {
+                makesState.items.value = viewModel.getMakes(yearsState.selected.value.toInt())
+                makesState.selected.value = ""  // Reset selected make when year changes
+            }
+        }
+    }
+
+    LaunchedEffect(makesState.selected.value,yearsState.selected.value) {
+        if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
+            coroutineScope.launch {
+                modelsState.items.value = viewModel.getModels(makesState.selected.value, yearsState.selected.value.toInt())
+                modelsState.selected.value = ""  // Reset selected model when make changes
+            }
+        }
+    }
+
+    LaunchedEffect(modelsState.selected.value,makesState.selected.value,yearsState.selected.value) {
+        if (modelsState.selected.value.isNotEmpty() && makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
+            coroutineScope.launch {
+                trimsState.items.value = viewModel.getTrims(makesState.selected.value, modelsState.selected.value, yearsState.selected.value.toInt())
+                trimsState.selected.value = ""  // Reset selected trim when model changes
+            }
+        }else{
+            trimsState.selected.value = ""
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
             .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Home", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Column(horizontalAlignment = Alignment.End) {
-                Text(text = "Hello", color = Color.Gray, fontSize = 14.sp)
-                Text(text = userName, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "Home",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Top)
+            )
+            TextButton(onClick = {}) {
+                Text(
+                    text = userName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.align(Alignment.Top),
+
+                    )
             }
         }
-
+        Spacer(modifier = Modifier.width(8.dp))
+        Row {
+            Spacer(modifier = Modifier.width(8.dp))
+            DropdownMenuField(
+                label = "Year",
+                options = yearsState.items.value.map { it.toString() },
+                selectedOption = yearsState.selected.value,
+                expanded = yearsState.expanded.value,
+                onOptionSelected = { yearsState.selected.value = it },
+                onExpandedChange = { yearsState.expanded.value = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
+        Row {
+            Spacer(modifier = Modifier.width(8.dp))
+            DropdownMenuField(
+                label = "Make",
+                options = makesState.items.value,
+                selectedOption = makesState.selected.value,
+                expanded = makesState.expanded.value,
+                onOptionSelected = { makesState.selected.value = it },
+                onExpandedChange = { makesState.expanded.value = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row {
+            Spacer(modifier = Modifier.width(8.dp))
+            DropdownMenuField(
+                label = "Model",
+                options = modelsState.items.value,
+                selectedOption = modelsState.selected.value,
+                expanded = modelsState.expanded.value,
+                onOptionSelected = { modelsState.selected.value = it },
+                onExpandedChange = { modelsState.expanded.value = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty() && modelsState.selected.value.isNotEmpty()){
+            Text("${makesState.selected.value} ${modelsState.selected.value} - ${yearsState.selected.value}", style = MaterialTheme.typography.bodyLarge)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        if (trimsState.items.value.isNotEmpty()) {
+            Text("Available Trims:", style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.height(8.dp))
+            trimsState.items.value.forEach { trim ->
+                TrimCard(name = trim, rating = 4.5f, reviews = 100)  // Mock ratings and reviews
+            }
+        } else if (modelsState.selected.value.isNotEmpty()) {
+            Text("No trims available for the selected make, model, and year.", style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownMenuField(
+    label: String,
+    options: List<String>,
+    selectedOption: String,
+    expanded: Boolean,
+    onOptionSelected: (String) -> Unit,
+    onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedOption,
+            onValueChange = {},
+            label = { Text(label) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onExpandedChange(true) },
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { onExpandedChange(!expanded) }
+                )
+            },
+            textStyle = LocalTextStyle.current.copy(fontSize = 14.sp)
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            DropdownMenu(selectedManufacturer, manufacturers) { selectedManufacturer = it }
-            DropdownMenu(selectedModel, models) { selectedModel = it }
-            DropdownMenu(selectedYear, years) { selectedYear = it }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.DarkGray),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "$selectedManufacturer $selectedModel - $selectedYear", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(text = "details details details details details", color = Color.White, fontSize = 14.sp)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Trim", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Column {
-            trims.forEach { trim ->
-                TrimCard(trim)
-                Spacer(modifier = Modifier.height(8.dp))
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            option,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = 14.sp
+                        )
+                    },
+                    onClick = {
+                        onOptionSelected(option)
+                        onExpandedChange(false)
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun DropdownMenu(selectedOption: String, options: List<String>, onOptionSelected: (String) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        Button(
-            onClick = { expanded = true },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-        ) {
-            Text(text = selectedOption, color = Color.White)
-        }
-//        DropdownMenu(
-//            expanded = expanded,
-//            onDismissRequest = { expanded = false },
-//            modifier = Modifier.background(Color.DarkGray)
-//        ) {
-//            options.forEach { option ->
-//                DropdownMenuItem(
-//                    onClick = {
-//                        onOptionSelected(option)
-//                        expanded = false
-//                    },
-//                    modifier = Modifier.background(Color.DarkGray)
-//                ) {
-//                    Text(text = option, color = Color.White)
-//                }
-//            }
-//        }
-    }
-}
-
-@Composable
-fun TrimCard(trim: Trim) {
+fun TrimCard(name: String, rating: Float, reviews: Int) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.DarkGray),
-        shape = RoundedCornerShape(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = trim.name, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Surface(
-                    modifier = Modifier.background(Color.Blue, shape = RoundedCornerShape(50)),
-                    color = Color.Transparent
-                ) {
-                    Text(
-                        text = "${trim.rating}/5",
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-            Text(text = "${trim.reviewCount} Reviews", color = Color.Gray, fontSize = 14.sp)
-            Text(text = trim.details, color = Color.White, fontSize = 14.sp)
+            Text(text = name, style = MaterialTheme.typography.bodySmall)
+            Text(text = "$rating/5", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "$reviews Reviews", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
-
-data class Trim(val name: String, val rating: Double, val reviewCount: Int, val details: String)
-

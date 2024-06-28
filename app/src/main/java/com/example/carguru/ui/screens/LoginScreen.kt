@@ -1,46 +1,44 @@
 package com.example.carguru.ui.screens
 
 import android.app.Activity
-import androidx.activity.ComponentActivity
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import com.example.carguru.R
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Text
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.navigation.NavController
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.material3.TextButton
+import com.example.carguru.utils.hideKeyboard
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.OutlinedTextField
+import com.example.carguru.viewmodels.LoginViewModel
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import com.google.android.gms.common.api.ApiException
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.carguru.R
-import com.example.carguru.utils.hideKeyboard
-import com.example.carguru.viewmodels.LoginViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import androidx.compose.foundation.gestures.detectTapGestures
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
 fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
@@ -115,8 +113,8 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
             Button(
                 onClick = { loginViewModel.onLoginClick() {displayName ->
                     navController.navigate("home/$displayName") {
-                    popUpTo("login") { inclusive = true }
-                }} },
+                        popUpTo("login") { inclusive = true }
+                    }} },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
