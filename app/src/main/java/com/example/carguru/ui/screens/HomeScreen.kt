@@ -126,24 +126,6 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Home",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.align(Alignment.Top)
-                    )
-                    TextButton(onClick = {}) {
-                        Text(
-                            text = userName,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.align(Alignment.Top)
-                        )
-                    }
-                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Row {
                     Spacer(modifier = Modifier.width(8.dp))
