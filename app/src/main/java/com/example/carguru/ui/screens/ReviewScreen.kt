@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,12 +18,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.carguru.data.model.Review
 
 
 @Composable
-fun ReviewScreen() {
+fun ReviewScreen(navController: NavHostController) {
     val reviews = listOf(
         Review("efewrfe","gfvgrtgvs","fdgvbdsfbv","Name Name", "January 2023", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum at ante ac velit pharetra ullamcorper.", 4, "https://example.com/image.jpg"),
         Review("efewrdgfe","gfvgrtgvs","fdgvbdsfbv","Name Name", "December 2022", "Curabitur bibendum vehicula nisi at sagittis. Donec viverra faucibus", 5, "https://example.com/image.jpg"),
@@ -30,7 +32,7 @@ fun ReviewScreen() {
     )
 
     Column(modifier = Modifier.fillMaxSize().background(Color.Black).padding(16.dp)) {
-        Header()
+        Header(navController)
         CarTitle()
         ReviewList(reviews)
         Footer()
@@ -38,9 +40,9 @@ fun ReviewScreen() {
 }
 
 @Composable
-fun Header() {
+fun Header(navController: NavHostController) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable{navController.navigate("profile")},
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = "Home", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
