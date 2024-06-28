@@ -11,59 +11,55 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Alignment
 import kotlinx.coroutines.launch
-import com.example.carguru.services.CarRepository
+import com.example.carguru.viewmodels.CarRepository
+import com.example.carguru.services.DropdownState
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
 
 
 @Composable
-fun HomeScreen(userName: String,viewModel: CarRepository = viewModel()) {
-    val years = remember { mutableStateOf<List<Int>>(emptyList()) }
-    var selectedYear by remember { mutableStateOf("") }
-    var expandedYear by remember { mutableStateOf(false) }
-    val makes = remember { mutableStateOf<List<String>>(emptyList()) }
-    var selectedMake by remember { mutableStateOf("") }
-    var expandedMake by remember { mutableStateOf(false) }
-    val models = remember { mutableStateOf<List<String>>(emptyList()) }
-    var selectedModel by remember { mutableStateOf("") }
-    var expandedModel by remember { mutableStateOf(false) }
-    val trims = remember { mutableStateOf<List<String>>(emptyList()) }
-    var selectedTrim by remember { mutableStateOf("") }
-    var expandedTrim by remember { mutableStateOf(false) }
+fun HomeScreen(navController: NavController, userName: String, viewModel: CarRepository = viewModel()) {
+    val yearsState = remember { DropdownState<Int>() }
+    val makesState = remember { DropdownState<String>() }
+    val modelsState = remember { DropdownState<String>() }
+    val trimsState = remember { DropdownState<String>() }
     val coroutineScope = rememberCoroutineScope()
 
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
-            years.value = viewModel.getYears()
+            yearsState.items.value = viewModel.getYears()
         }
     }
 
-    LaunchedEffect(selectedYear) {
-        if (selectedYear.isNotEmpty()) {
+    LaunchedEffect(yearsState.selected.value) {
+        if (yearsState.selected.value.isNotEmpty()) {
             coroutineScope.launch {
-                makes.value = viewModel.getMakes(selectedYear.toInt())
-                selectedMake = ""  // Reset selected make when year changes
+                makesState.items.value = viewModel.getMakes(yearsState.selected.value.toInt())
+                makesState.selected.value = ""  // Reset selected make when year changes
             }
         }
     }
 
-    LaunchedEffect(selectedMake,selectedYear) {
-        if (selectedMake.isNotEmpty() && selectedYear.isNotEmpty()) {
+    LaunchedEffect(makesState.selected.value,yearsState.selected.value) {
+        if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
             coroutineScope.launch {
-                models.value = viewModel.getModels(selectedMake, selectedYear.toInt())
-                selectedModel = ""  // Reset selected model when make changes
+                modelsState.items.value = viewModel.getModels(makesState.selected.value, yearsState.selected.value.toInt())
+                modelsState.selected.value = ""  // Reset selected model when make changes
             }
         }
     }
 
-    LaunchedEffect(selectedModel,selectedMake,selectedYear) {
-        if (selectedModel.isNotEmpty() && selectedMake.isNotEmpty() && selectedYear.isNotEmpty()) {
+    LaunchedEffect(modelsState.selected.value,makesState.selected.value,yearsState.selected.value) {
+        if (modelsState.selected.value.isNotEmpty() && makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
             coroutineScope.launch {
-                trims.value = viewModel.getTrims(selectedMake, selectedModel, selectedYear.toInt())
-                selectedTrim = ""  // Reset selected trim when model changes
+                trimsState.items.value = viewModel.getTrims(makesState.selected.value, modelsState.selected.value, yearsState.selected.value.toInt())
+                trimsState.selected.value = ""  // Reset selected trim when model changes
             }
         }else{
-            selectedTrim = ""
+            trimsState.selected.value = ""
         }
     }
 
@@ -72,18 +68,38 @@ fun HomeScreen(userName: String,viewModel: CarRepository = viewModel()) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Home", style = MaterialTheme.typography.bodyLarge)
-        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Home",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Top)
+            )
+            TextButton(onClick = {}) {
+                Text(
+                    text = userName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.align(Alignment.Top),
+
+                    )
+            }
+        }
+        Spacer(modifier = Modifier.width(8.dp))
         Row {
             Spacer(modifier = Modifier.width(8.dp))
             DropdownMenuField(
                 label = "Year",
-                options = years.value.map { it.toString() },
-                selectedOption = selectedYear,
-                expanded = expandedYear,
-                onOptionSelected = { selectedYear = it },
-                onExpandedChange = { expandedYear = it },
-                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                options = yearsState.items.value.map { it.toString() },
+                selectedOption = yearsState.selected.value,
+                expanded = yearsState.expanded.value,
+                onOptionSelected = { yearsState.selected.value = it },
+                onExpandedChange = { yearsState.expanded.value = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -91,12 +107,14 @@ fun HomeScreen(userName: String,viewModel: CarRepository = viewModel()) {
             Spacer(modifier = Modifier.width(8.dp))
             DropdownMenuField(
                 label = "Make",
-                options = makes.value,
-                selectedOption = selectedMake,
-                expanded = expandedMake,
-                onOptionSelected = { selectedMake = it },
-                onExpandedChange = { expandedMake = it },
-                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                options = makesState.items.value,
+                selectedOption = makesState.selected.value,
+                expanded = makesState.expanded.value,
+                onOptionSelected = { makesState.selected.value = it },
+                onExpandedChange = { makesState.expanded.value = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -104,26 +122,28 @@ fun HomeScreen(userName: String,viewModel: CarRepository = viewModel()) {
             Spacer(modifier = Modifier.width(8.dp))
             DropdownMenuField(
                 label = "Model",
-                options = models.value,
-                selectedOption = selectedModel,
-                expanded = expandedModel,
-                onOptionSelected = { selectedModel = it },
-                onExpandedChange = { expandedModel = it },
-                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                options = modelsState.items.value,
+                selectedOption = modelsState.selected.value,
+                expanded = modelsState.expanded.value,
+                onOptionSelected = { modelsState.selected.value = it },
+                onExpandedChange = { modelsState.expanded.value = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        if (selectedMake.isNotEmpty() && selectedYear.isNotEmpty() && selectedModel.isNotEmpty()){
-            Text("${selectedMake} ${selectedModel} - ${selectedYear}", style = MaterialTheme.typography.bodyLarge)
+        if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty() && modelsState.selected.value.isNotEmpty()){
+            Text("${makesState.selected.value} ${modelsState.selected.value} - ${yearsState.selected.value}", style = MaterialTheme.typography.bodyLarge)
         }
         Spacer(modifier = Modifier.height(16.dp))
-        if (trims.value.isNotEmpty()) {
+        if (trimsState.items.value.isNotEmpty()) {
             Text("Available Trims:", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
-            trims.value.forEach { trim ->
+            trimsState.items.value.forEach { trim ->
                 TrimCard(name = trim, rating = 4.5f, reviews = 100)  // Mock ratings and reviews
             }
-        } else if (selectedModel.isNotEmpty()) {
+        } else if (modelsState.selected.value.isNotEmpty()) {
             Text("No trims available for the selected make, model, and year.", style = MaterialTheme.typography.bodySmall)
         }
     }

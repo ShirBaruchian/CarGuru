@@ -1,4 +1,4 @@
-package com.example.carguru.services
+package com.example.carguru.viewmodels
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +11,7 @@ class CarRepository : ViewModel() {
         return withContext(Dispatchers.IO) {
             try {
                 val response = ApiClient.carQueryService.getYears()
-                val jsonResponse = response.toString().removePrefix("?(").removeSuffix(");")
+                val jsonResponse = response.removePrefix("?(").removeSuffix(");")
                 val jsonElement = JsonParser.parseString(jsonResponse).asJsonObject
                 val yearsObject = jsonElement.getAsJsonObject("Years")
                 val minYear = yearsObject.get("min_year").asInt
@@ -28,7 +28,7 @@ class CarRepository : ViewModel() {
         return withContext(Dispatchers.IO) {
             try {
                 val response = ApiClient.carQueryService.getMakes(year)
-                val jsonResponse = response.toString().removePrefix("?(").removeSuffix(");")
+                val jsonResponse = response.removePrefix("?(").removeSuffix(");")
                 val jsonElement = JsonParser.parseString(jsonResponse).asJsonObject
                 val makesArray = jsonElement.getAsJsonArray("Makes")
                 makesArray.map { it.asJsonObject.get("make_display").asString }

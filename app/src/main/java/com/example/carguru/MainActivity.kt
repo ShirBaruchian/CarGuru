@@ -14,6 +14,7 @@ import com.example.carguru.ui.screens.SignUpScreen
 import com.example.carguru.viewmodels.LoginViewModel
 import com.example.carguru.viewmodels.SignUpViewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.carguru.ui.screens.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
@@ -40,7 +41,7 @@ fun AppNavigation(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewMod
         }
         composable("home/{userName}") { backStackEntry ->
             val userName = backStackEntry.arguments?.getString("userName") ?: "User"
-            HomeScreen(userName = userName) // Pass actual user name if available
+            HomeScreen(navController = navController,userName = userName) // Pass actual user name if available
         }
     }
 }
