@@ -47,7 +47,6 @@ fun HomeScreen(
     val trimsState = remember { DropdownState<String>() }
     val coroutineScope = rememberCoroutineScope()
 
-
     val reviews by reviewsViewModel.reviews.collectAsState()
     val userName by userViewModel.userName.collectAsState()
 
@@ -66,7 +65,7 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(makesState.selected.value,yearsState.selected.value) {
+    LaunchedEffect(makesState.selected.value, yearsState.selected.value) {
         if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
             coroutineScope.launch {
                 modelsState.items.value = viewModel.getModels(makesState.selected.value, yearsState.selected.value.toInt())
@@ -75,13 +74,13 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(modelsState.selected.value,makesState.selected.value,yearsState.selected.value) {
+    LaunchedEffect(modelsState.selected.value, makesState.selected.value, yearsState.selected.value) {
         if (modelsState.selected.value.isNotEmpty() && makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
             coroutineScope.launch {
                 trimsState.items.value = viewModel.getTrims(makesState.selected.value, modelsState.selected.value, yearsState.selected.value.toInt())
                 trimsState.selected.value = ""  // Reset selected trim when model changes
             }
-        }else{
+        } else {
             trimsState.selected.value = ""
         }
     }
@@ -112,7 +111,11 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
             Text(
                 text = "Hello $userName",
                 style = MaterialTheme.typography.titleLarge,
@@ -120,7 +123,7 @@ fun HomeScreen(
             )
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(16.dp)
             ) {
                 Row(
@@ -137,9 +140,8 @@ fun HomeScreen(
                         Text(
                             text = userName,
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.align(Alignment.Top),
-
-                            )
+                            modifier = Modifier.align(Alignment.Top)
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -188,8 +190,11 @@ fun HomeScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty() && modelsState.selected.value.isNotEmpty()){
-                    Text("${makesState.selected.value} ${modelsState.selected.value} - ${yearsState.selected.value}", style = MaterialTheme.typography.bodyLarge)
+                if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty() && modelsState.selected.value.isNotEmpty()) {
+                    Text(
+                        "${makesState.selected.value} ${modelsState.selected.value} - ${yearsState.selected.value}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (trimsState.items.value.isNotEmpty()) {
@@ -205,6 +210,7 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .weight(1f) // Use weight to take the remaining space
                     .background(MaterialTheme.colorScheme.background)
                     .padding(16.dp)
             ) {
