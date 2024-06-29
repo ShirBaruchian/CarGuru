@@ -15,6 +15,84 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.navigation.NavController
+import com.example.carguru.models.ReviewWithUser
+import com.example.carguru.viewmodels.ReviewsViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReviewDetailScreen(
+    navController: NavController,
+    reviewId: String,
+    reviewsViewModel: ReviewsViewModel
+) {
+    val reviewWithUser by reviewsViewModel.getReviewWithUser(reviewId).collectAsState(initial = null)
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Review Details") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White
+                )
+            )
+        }
+    ) { innerPadding ->
+        reviewWithUser?.let { review: ReviewWithUser ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "${review.review.manufacturer} ${review.review.model} (${review.review.year}) - ${review.review.trim}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = review.review.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                RatingBar(rating = review.review.rating) {}
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Review by: ${review.username}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = review.review.text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                val dateFormat = remember { SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm:ss a", Locale.getDefault()) }
+                val formattedDate = review.review.timestamp?.let { dateFormat.format(it) } ?: "Unknown"
+                Text(
+                    text = formattedDate,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
 
 
 @Composable

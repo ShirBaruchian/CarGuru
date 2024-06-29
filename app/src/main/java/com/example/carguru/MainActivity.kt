@@ -79,10 +79,6 @@ fun AppNavigation(startDestination: String, loginViewModel: LoginViewModel, sign
         ) { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId") ?: return@composable
             ReviewDetailScreen(navController = navController, reviewId = reviewId, reviewsViewModel = reviewsViewModel)
-            val user = FirebaseAuth.getInstance().currentUser
-            val userName = user?.displayName ?: user?.email ?: "User"
-            HomeScreen(navController = navController,reviewsViewModel = reviewsViewModel,
-                userViewModel = userViewModel, viewModel = carViewModel)
         }
         composable("profile") {
             val user = userViewModel.user.value

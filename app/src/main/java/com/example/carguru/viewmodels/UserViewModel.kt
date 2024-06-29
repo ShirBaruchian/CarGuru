@@ -1,13 +1,21 @@
 package com.example.carguru.viewmodels
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.carguru.data.model.User
 import com.google.firebase.auth.FirebaseAuth
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class UserViewModel : ViewModel() {
-    var user = mutableStateOf<User?>(null)
-        private set
+    private val _userName = MutableStateFlow("")
+    val userName: StateFlow<String> = _userName
+
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> = _user
 
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
@@ -16,41 +24,38 @@ class UserViewModel : ViewModel() {
         fetchUserDetails()
     }
 
-    private fun setUser(newUser: User) {
-        user.value = newUser
-    }
-
     fun fetchUserDetails() {
-        val currentUser = firebaseAuth.currentUser
-        currentUser?.let { user ->
-            firestore.collection("users").document(user.uid).get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.exists()) {
-                        val username = document.getString("username") ?: ""
-                        val password = document.getString("password") ?: ""
-                        val birthdate = document.getString("birthdate") ?: ""
-                        val userDetails = User(
-                            id = user.uid,
-                            username = username,
-                            password = password,
-                            email = user.email ?: "",
-                            birthdate = birthdate
-                        )
-                        userDetails.let {
-                            setUser(it)
-                        }
+        viewModelScope.launch {
+            try {
+                val userId = firebaseAuth.currentUser?.uid
+                if (userId != null) {
+                    Log.d("UserViewModel", "Fetching user data for userId: $userId")
+                    val userSnapshot = firestore.collection("users").document(userId).get().await()
+                    val user = userSnapshot.toObject(User::class.java)
+                    if (user != null) {
+                        _userName.value = user.username
+                        _user.value = user
+                    } else {
+                        _userName.value = "Unknown"
                     }
+                } else {
+                    _userName.value = "Unknown"
                 }
+            } catch (e: Exception) {
+                Log.e("UserViewModel", "Failed to fetch user data", e)
+                _userName.value = "Unknown"
+            }
         }
     }
     fun updateUserDetails(userId: String, newUsername: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val userUpdates = mapOf(
-            "username" to newUsername,
+            "username" to newUsername
         )
 
         firestore.collection("users").document(userId).update(userUpdates)
             .addOnSuccessListener {
-                user.value = user.value?.copy(username = newUsername)
+                _user.value = _user.value?.copy(username = newUsername)
+                _userName.value = newUsername
                 onSuccess()
             }
             .addOnFailureListener { exception ->
