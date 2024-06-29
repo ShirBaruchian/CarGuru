@@ -36,8 +36,8 @@ import com.example.carguru.viewmodels.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import androidx.compose.foundation.gestures.detectTapGestures
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
@@ -53,12 +53,9 @@ fun LoginScreen(navController: NavController,
         try {
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let {
-                loginViewModel.signInWithGoogle(it) { isSuccessful ->
-                    if (isSuccessful) {
-                        userViewModel.fetchCurrentUser()
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
-                        }
+                loginViewModel.signInWithGoogle(it) {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
                     }
                 }
             }
@@ -118,13 +115,11 @@ fun LoginScreen(navController: NavController,
                     .padding(vertical = 8.dp)
             )
             Button(
-                onClick = { loginViewModel.onLoginClick() {isSuccessful ->
-                    if (isSuccessful) {
-                        userViewModel.fetchCurrentUser()
-                        navController.navigate("home") {
+                onClick = { loginViewModel.onLoginClick() {
+                    navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
-                }} },
+                }} ,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)

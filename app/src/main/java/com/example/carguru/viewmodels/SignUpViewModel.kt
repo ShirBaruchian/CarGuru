@@ -1,18 +1,18 @@
 package com.example.carguru.viewmodels
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import java.util.Date
+import java.util.Locale
+import java.util.Calendar
+import java.text.SimpleDateFormat
 import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import com.example.carguru.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.UserProfileChangeRequest
+import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import com.google.firebase.auth.UserProfileChangeRequest
 
 class SignUpViewModel : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()

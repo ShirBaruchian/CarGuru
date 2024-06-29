@@ -1,61 +1,64 @@
 package com.example.carguru.viewmodels
-
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.example.carguru.data.model.User
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
 
 class UserViewModel : ViewModel() {
-    private val firestore = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    var user = mutableStateOf<User?>(null)
+        private set
 
-    private val _userName = MutableStateFlow("")
-    val userName: StateFlow<String> = _userName
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
     init {
-        fetchCurrentUser()
+        fetchUserDetails()
     }
 
-    fun fetchCurrentUser() {
-        viewModelScope.launch {
-            try {
-                val userId = auth.currentUser?.uid
-                if (userId != null) {
-                    Log.d("UserViewModel", "Fetching user data for userId: $userId")
+    private fun setUser(newUser: User) {
+        user.value = newUser
+    }
 
-                    val userSnapshot = withTimeoutOrNull(5000) {
-                        firestore.collection("users").document(userId).get().await()
+    fun fetchUserDetails() {
+        val currentUser = firebaseAuth.currentUser
+        currentUser?.let { user ->
+            firestore.collection("users").document(user.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        val username = document.getString("username") ?: ""
+                        val password = document.getString("password") ?: ""
+                        val birthdate = document.getString("birthdate") ?: ""
+                        val userDetails = User(
+                            id = user.uid,
+                            username = username,
+                            password = password,
+                            email = user.email ?: "",
+                            birthdate = birthdate
+                        )
+                        userDetails.let {
+                            setUser(it)
+                        }
                     }
-
-                    if (userSnapshot != null && userSnapshot.exists()) {
-                        val userName = userSnapshot.getString("username") ?: "Unknown"
-                        Log.d("UserViewModel", "Fetched username: $userName")
-                        _userName.value = userName
-                    } else {
-                        Log.d("UserViewModel", "User document does not exist or timed out")
-                        _userName.value = "Unknown"
-                    }
-                } else {
-                    Log.d("UserViewModel", "User ID is null")
-                    _userName.value = "Unknown"
                 }
-            } catch (e: Exception) {
-                Log.e("UserViewModel", "Failed to fetch user data", e)
-                _userName.value = "Unknown"
-            }
         }
+    }
+    fun updateUserDetails(userId: String, newUsername: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val userUpdates = mapOf(
+            "username" to newUsername,
+        )
+
+        firestore.collection("users").document(userId).update(userUpdates)
+            .addOnSuccessListener {
+                user.value = user.value?.copy(username = newUsername)
+                onSuccess()
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception.message ?: "Failed to update user details.")
+            }
     }
 
     fun logout() {
-        auth.signOut()
+        firebaseAuth.signOut()
     }
 }

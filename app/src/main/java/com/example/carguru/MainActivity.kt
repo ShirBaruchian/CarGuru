@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.google.firebase.auth.FirebaseAuth
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
@@ -19,36 +20,46 @@ import com.example.carguru.ui.screens.LoginScreen
 import com.example.carguru.ui.screens.ReviewDetailScreen
 import com.example.carguru.ui.screens.SignUpScreen
 import com.example.carguru.viewmodels.AddReviewViewModel
+import com.example.carguru.ui.screens.ProfileScreen
+import com.example.carguru.viewmodels.CarRepository
+import com.example.carguru.viewmodels.UserViewModel
 import com.example.carguru.viewmodels.LoginViewModel
 import com.example.carguru.viewmodels.ReviewsViewModel
 import com.example.carguru.viewmodels.SignUpViewModel
-import com.example.carguru.viewmodels.UserViewModel
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
+    private val firebaseAuth = FirebaseAuth.getInstance()
     private val loginViewModel: LoginViewModel by viewModels()
     private val signUpViewModel: SignUpViewModel by viewModels()
     private val reviewsViewModel: ReviewsViewModel by viewModels()
-    private val userViewModel: UserViewModel by viewModels()
     private val addReviewViewModel: AddReviewViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
+    private val carViewModel: CarRepository by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        userViewModel.fetchUserDetails()
         setContent {
             CarGuruTheme {
-                AppNavigation(loginViewModel, signUpViewModel,
+                val currentUser = firebaseAuth.currentUser
+                val startDestination = if (currentUser != null) "home" else "login"
+                AppNavigation(startDestination, loginViewModel, signUpViewModel,
                     reviewsViewModel, userViewModel,
-                    addReviewViewModel)
+                    addReviewViewModel, carViewModel)
             }
         }
     }
 }
 
+
+
 @Composable
-fun AppNavigation(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel,
+fun AppNavigation(startDestination: String, loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel,
                   reviewsViewModel: ReviewsViewModel, userViewModel: UserViewModel,
-                  addReviewViewModel: AddReviewViewModel) {
+                  addReviewViewModel: AddReviewViewModel,carViewModel: CarRepository) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("login") {
             LoginScreen(navController = navController, loginViewModel = loginViewModel,
                 userViewModel = userViewModel)
@@ -57,7 +68,7 @@ fun AppNavigation(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewMod
             SignUpScreen(navController = navController, signUpViewModel = signUpViewModel)
         }
         composable("home") {
-            HomeScreen(navController = navController, reviewsViewModel = reviewsViewModel, userViewModel) // Pass actual user name if available
+            HomeScreen(navController = navController, reviewsViewModel = reviewsViewModel, userViewModel, carViewModel) // Pass actual user name if available
         }
         composable("addReview") {
             AddReviewScreen(navController = navController, addReviewViewModel = addReviewViewModel)
@@ -68,6 +79,16 @@ fun AppNavigation(loginViewModel: LoginViewModel, signUpViewModel: SignUpViewMod
         ) { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId") ?: return@composable
             ReviewDetailScreen(navController = navController, reviewId = reviewId, reviewsViewModel = reviewsViewModel)
+            val user = FirebaseAuth.getInstance().currentUser
+            val userName = user?.displayName ?: user?.email ?: "User"
+            HomeScreen(navController = navController,reviewsViewModel = reviewsViewModel,
+                userViewModel = userViewModel, viewModel = carViewModel)
+        }
+        composable("profile") {
+            val user = userViewModel.user.value
+            user?.let {
+                ProfileScreen(navController = navController, profile = it,userViewModel = userViewModel)
+            }
         }
     }
 }

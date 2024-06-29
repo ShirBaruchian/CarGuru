@@ -1,7 +1,5 @@
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
-
 
 interface CarQueryService {
     @GET("/api/0.3/?callback=?&cmd=getYears")
