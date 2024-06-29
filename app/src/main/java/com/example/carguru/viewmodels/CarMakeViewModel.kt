@@ -1,8 +1,8 @@
 package com.example.carguru.viewmodels
 
+import com.google.gson.JsonParser
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
-import com.google.gson.JsonParser
 import kotlinx.coroutines.withContext
 
 class CarRepository : ViewModel() {
