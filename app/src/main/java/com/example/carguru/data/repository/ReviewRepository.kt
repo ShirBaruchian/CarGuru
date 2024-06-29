@@ -1,48 +1,64 @@
 package com.example.carguru.data.repository
 
 import com.example.carguru.data.local.ReviewDao
-import com.example.carguru.data.model.Review
 import com.example.carguru.data.local.ReviewEntity
+import com.example.carguru.data.local.UserDao
 import com.example.carguru.data.remote.FirebaseReviewService
+import com.example.carguru.data.repository.UserRepository
+import com.example.carguru.models.ReviewWithUser
 import com.example.carguru.utils.toReview
 import com.example.carguru.utils.toReviewEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.util.Date
+import kotlinx.coroutines.withContext
 
-class ReviewRepository(private val reviewDao: ReviewDao, private val firebaseService: FirebaseReviewService) {
+class ReviewRepository(
+    private val reviewDao: ReviewDao,
+    private val firebaseReviewService: FirebaseReviewService,
+    private val userRepository: UserRepository
+) {
+
     fun startListeningForUpdates(scope: CoroutineScope) {
-        firebaseService.addReviewListener { reviews ->
-            updateLocalDatabase(scope, reviews.map { it.toReviewEntity() })
-        }
-    }
-
-    private fun updateLocalDatabase(scope: CoroutineScope, reviews: List<ReviewEntity>) {
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                // Clear existing data and insert the new data
-                reviewDao.clearAllReviews()
-                reviewDao.insertReviews(reviews)
+        firebaseReviewService.addReviewListener { reviews ->
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    updateLocalDatabase(reviews.map { it.toReviewEntity() })
+                }
             }
         }
     }
-    suspend fun getReview(reviewId: String): ReviewEntity? {
-        return reviewDao.getReviewById(reviewId) ?: firebaseService.getReview(reviewId)?.toReviewEntity()?.also { reviewEntity ->
-            reviewDao.insertReview(reviewEntity)
+
+    private suspend fun updateLocalDatabase(reviews: List<ReviewEntity>) {
+        reviewDao.clearAllReviews()
+        reviewDao.insertReviews(reviews)
+    }
+
+    fun getAllReviews(): Flow<List<ReviewEntity>> {
+        return reviewDao.getAllReviews()
+    }
+
+    fun getAllReviewsWithUser(): Flow<List<ReviewWithUser>> {
+        return reviewDao.getAllReviews().map { reviewEntities ->
+            reviewEntities.map { reviewEntity ->
+                val user = userRepository.getUser(reviewEntity.userId)?.firstOrNull()  // Assuming you have a method to get the user
+                ReviewWithUser(reviewEntity, user?.username ?: "Unknown")
+            }
         }
     }
 
     suspend fun saveReview(review: ReviewEntity) {
         reviewDao.insertReview(review)
-        firebaseService.saveReview(review.toReview())
+        firebaseReviewService.updateReview(review.toReview())
     }
 
-    suspend fun syncReviews() = withContext(Dispatchers.IO) {
-        val localReviews = reviewDao.getAllReviews()
-        val remoteReviews = firebaseService.getAllReviews()
+    suspend fun syncReviews(scope: CoroutineScope) = withContext(Dispatchers.IO) {
+        val localReviews = reviewDao.getAllReviews().first()
+        val remoteReviews = firebaseReviewService.getAllReviews()
 
         val localReviewMap = localReviews.associateBy { it.id }
         val remoteReviewMap = remoteReviews.associateBy { it.id }
@@ -58,8 +74,8 @@ class ReviewRepository(private val reviewDao: ReviewDao, private val firebaseSer
         // Update or insert reviews from Room into Firebase
         for (localReview in localReviews) {
             val remoteReview = remoteReviewMap[localReview.id]
-            if (remoteReview == null || remoteReview.lastUpdated!!.before(localReview.lastUpdated)) {
-                firebaseService.updateReview(localReview.toReview())
+            if (remoteReview == null || remoteReview.lastUpdated?.before(localReview.lastUpdated) != false) {
+                firebaseReviewService.updateReview(localReview.toReview())
             }
         }
 
@@ -74,11 +90,16 @@ class ReviewRepository(private val reviewDao: ReviewDao, private val firebaseSer
         val localReviewIds = localReviews.map { it.id }.toSet()
         val reviewsToDeleteFromFirebase = remoteReviews.filter { it.id !in localReviewIds }
         for (reviewToDelete in reviewsToDeleteFromFirebase) {
-            firebaseService.deleteReview(reviewToDelete.id)
+            firebaseReviewService.deleteReview(reviewToDelete.id)
         }
     }
 
-    suspend fun getAllReviews(): List<ReviewEntity> {
-        return reviewDao.getAllReviews()
+    fun getReview(reviewId: String): Flow<ReviewWithUser?> {
+        return reviewDao.getReviewById(reviewId).map { reviewEntity ->
+            reviewEntity?.let {
+                val user = userRepository.getUser(it.userId).firstOrNull()  // Assuming you have a method to get the user
+                ReviewWithUser(it, user?.username ?: "Unknown")
+            }
+        }
     }
 }

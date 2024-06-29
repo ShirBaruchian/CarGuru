@@ -1,4 +1,5 @@
 package com.example.carguru.viewmodels
+
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.carguru.data.model.User
@@ -14,20 +15,22 @@ import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
-    private val _userName = MutableStateFlow("")
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
+    private val _userName = MutableStateFlow("Unknown")
     val userName: StateFlow<String> = _userName
 
     private val _user = MutableStateFlow<UserEntity?>(null)
     val user: StateFlow<UserEntity?> = _user
 
-    private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
     init {
+        userRepository.startListeningForUpdates(viewModelScope)
         viewModelScope.launch {
             try {
 
-                userRepository.syncUsers()
+                userRepository.syncUsers(viewModelScope)
             } catch (e: Exception) {
                 Log.e("UserViewModel", "Failed to sync user data", e)
             }
@@ -39,12 +42,13 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
             try {
                 val userId = firebaseAuth.currentUser?.uid
                 if (userId != null) {
-                    val user = userRepository.getUser(userId)
-                    if (user != null) {
-                        _userName.value = user.username
-                        _user.value = user
-                    } else {
-                        _userName.value = "Unknown"
+                    userRepository.getUser(userId).collect { user ->
+                        if (user != null) {
+                            _userName.value = user.username
+                            _user.value = user
+                        } else {
+                            _userName.value = "Unknown"
+                        }
                     }
                 } else {
                     _userName.value = "Unknown"
@@ -58,15 +62,16 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     fun updateUserDetails(userId: String, newUsername: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val user = userRepository.getUser(userId)
-                if (user != null) {
-                    val updatedUser = user.copy(username = newUsername, lastUpdated = Date())
-                    userRepository.saveUser(updatedUser)
-                    _user.value = updatedUser
-                    _userName.value = newUsername
-                    onSuccess()
-                } else {
-                    onFailure("User not found")
+                userRepository.getUser(userId).collect { user ->
+                    if (user != null) {
+                        val updatedUser = user.copy(username = newUsername, lastUpdated = Date())
+                        userRepository.saveUser(updatedUser)
+                        _user.value = updatedUser
+                        _userName.value = newUsername
+                        onSuccess()
+                    } else {
+                        onFailure("User not found")
+                    }
                 }
             } catch (e: Exception) {
                 onFailure(e.message ?: "Failed to update user details.")

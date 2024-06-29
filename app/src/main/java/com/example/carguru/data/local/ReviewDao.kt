@@ -4,7 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import java.util.Date
+import com.example.carguru.data.local.ReviewEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReviewDao {
@@ -15,10 +16,10 @@ interface ReviewDao {
     suspend fun insertReviews(reviews: List<ReviewEntity>)
 
     @Query("SELECT * FROM reviews WHERE id = :reviewId")
-    suspend fun getReviewById(reviewId: String): ReviewEntity?
+    fun getReviewById(reviewId: String): Flow<ReviewEntity?>
 
     @Query("SELECT * FROM reviews")
-    suspend fun getAllReviews(): List<ReviewEntity>
+    fun getAllReviews(): Flow<List<ReviewEntity>>
 
     @Query("DELETE FROM reviews WHERE id = :reviewId")
     suspend fun deleteReviewById(reviewId: String)

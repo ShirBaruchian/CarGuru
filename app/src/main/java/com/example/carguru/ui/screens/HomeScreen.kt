@@ -51,7 +51,6 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         userViewModel.fetchCurrentUser()
-        reviewsViewModel.fetchReviews()
     }
 
     LaunchedEffect(Unit) {

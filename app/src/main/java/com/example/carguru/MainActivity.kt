@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
 
         // Initialize repositories
         val userRepository = UserRepository(database.userDao(), firebaseUserService)
-        val reviewRepository = ReviewRepository(database.reviewDao(), firebaseReviewService)
+        val reviewRepository = ReviewRepository(database.reviewDao(), firebaseReviewService, userRepository)
 
         userViewModel = UserViewModel(userRepository)
         reviewsViewModel = ReviewsViewModel(reviewRepository, userRepository)

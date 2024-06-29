@@ -31,7 +31,7 @@ fun ReviewDetailScreen(
     reviewId: String,
     reviewsViewModel: ReviewsViewModel
 ) {
-    val reviewWithUser by reviewsViewModel.getReviewWithUser(reviewId).collectAsState(initial = null)
+    val reviewWithUser by reviewsViewModel.getReview(reviewId).collectAsState(initial = null)
 
     Scaffold(
         topBar = {
