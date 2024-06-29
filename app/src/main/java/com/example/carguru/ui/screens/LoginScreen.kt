@@ -32,6 +32,7 @@ import com.google.android.gms.common.api.ApiException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import com.example.carguru.viewmodels.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import androidx.compose.foundation.gestures.detectTapGestures
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -41,7 +42,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
-fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
+fun LoginScreen(navController: NavController,
+                userViewModel: UserViewModel,
+                loginViewModel: LoginViewModel) {
     val context = LocalContext.current as Activity
     val focusManager = LocalFocusManager.current
 
@@ -60,6 +63,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
             e.printStackTrace()
         }
     }
+
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -114,7 +118,8 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                 onClick = { loginViewModel.onLoginClick() {
                     navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
-                    }} },
+                    }
+                }} ,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)

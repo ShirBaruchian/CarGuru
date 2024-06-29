@@ -1,14 +1,21 @@
 package com.example.carguru.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.carguru.data.model.User
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class LoginViewModel(): ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+
     var email: String by mutableStateOf("")
         private set
 
@@ -26,25 +33,43 @@ class LoginViewModel(): ViewModel() {
         password = newPassword
     }
 
-    fun onLoginClick(onSuccess: (String) -> Unit) {
+    fun onLoginClick(callback: (Boolean) -> Unit) {
         firebaseAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    onSuccess(firebaseAuth.currentUser?.displayName ?: "User")
+                    callback(true)
                 } else {
                     errorMessage.value = task.exception?.message ?: "Log in failed"
+                    callback(false)
                 }
             }
     }
 
-    fun signInWithGoogle(idToken: String, onSuccess: (String) -> Unit){
+    fun signInWithGoogle(idToken: String, callback: (Boolean) -> Unit){
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = firebaseAuth.currentUser
-                    val displayName = user?.displayName ?: "User"
-                    onSuccess(displayName)
+                    if (user != null) {
+                        viewModelScope.launch {
+                            val userDoc = firestore.collection("users").document(user.uid).get().await()
+                            if (!userDoc.exists()) {
+                                // If user data does not exist, create a new document with basic details
+                                val newUser = User(user.uid,
+                                    user.displayName ?: "Unknown",
+                                    "",
+                                    user.email ?: "Unknown",
+                                    ""
+                                )
+                                firestore.collection("users").document(user.uid).set(newUser).await()
+                            }
+                            callback(true)
+                        }
+                    } else {
+                        errorMessage.value = "Failed to retrieve user data"
+                        callback(false)
+                    }
                 } else {
                     errorMessage.value = task.exception?.message ?: "Sign-In failed"
                 }
