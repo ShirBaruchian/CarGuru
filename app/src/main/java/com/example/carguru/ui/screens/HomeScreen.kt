@@ -50,7 +50,7 @@ fun HomeScreen(
     val userName by userViewModel.userName.collectAsState()
 
     LaunchedEffect(Unit) {
-        userViewModel.fetchUserDetails()
+        userViewModel.fetchCurrentUser()
         reviewsViewModel.fetchReviews()
     }
 

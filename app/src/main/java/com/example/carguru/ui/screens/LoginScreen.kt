@@ -47,7 +47,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
 fun LoginScreen(navController: NavController,
-                userViewModel: UserViewModel,
                 loginViewModel: LoginViewModel) {
     val context = LocalContext.current as Activity
     val focusManager = LocalFocusManager.current
@@ -114,7 +113,6 @@ fun LoginScreen(navController: NavController,
             Button(
                 onClick = { loginViewModel.onLoginClick() {success ->
                     if (success) {
-                        userViewModel.fetchUserDetails()
                         navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
                         }

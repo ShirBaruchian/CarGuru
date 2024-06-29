@@ -1,31 +1,35 @@
 package com.example.carguru.data.repository
 
-import androidx.lifecycle.LiveData
-import com.example.carguru.data.local.AppDatabase
+import com.example.carguru.data.local.UserDao
+import com.example.carguru.data.model.User
 import com.example.carguru.data.local.UserEntity
 import com.example.carguru.data.remote.FirebaseUserService
-import com.example.carguru.models.User
 import com.example.carguru.utils.toUser
 import com.example.carguru.utils.toUserEntity
+import java.util.Date
 
-class UserRepository(private val database: AppDatabase, private val remoteService: FirebaseUserService) {
-    private val userDao = database.userDao()
+class UserRepository(private val userDao: UserDao, private val firebaseService: FirebaseUserService) {
 
-    fun getUserById(userId: String): LiveData<UserEntity> = userDao.getUserById(userId)
-
-    suspend fun insertUser(user: UserEntity) {
-        userDao.insertUser(user)
-        remoteService.syncUserWithFirestore(user.toUser())
-    }
-
-    suspend fun fetchUserFromFirestore(userId: String): UserEntity? {
-        return remoteService.fetchUserFromFirestore(userId)?.toUserEntity()?.also {
-            userDao.insertUser(it)
+    suspend fun getUser(userId: String): UserEntity? {
+        return userDao.getUserById(userId) ?: firebaseService.getUser(userId)?.toUserEntity()?.also { userEntity ->
+            userDao.insertUser(userEntity)
         }
     }
 
-    suspend fun fetchUsersFromFirestore() {
-        val users = remoteService.fetchUsersFromFirestore()
-        userDao.insertUsers(users.map { it.toUserEntity() })
+    suspend fun saveUser(user: UserEntity) {
+        userDao.insertUser(user)
+        firebaseService.saveUser(user.toUser())
+    }
+
+    suspend fun getLastUpdateDate(): Date? {
+        return userDao.getLastUpdateDate()
+    }
+
+    suspend fun syncUsers() {
+        val lastUpdateDate = getLastUpdateDate()
+        val remoteUsers = firebaseService.getAllUsers(lastUpdateDate)
+        remoteUsers.forEach { user ->
+            userDao.insertUser(user.toUserEntity())
+        }
     }
 }

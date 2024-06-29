@@ -1,19 +1,28 @@
 package com.example.carguru.data.local
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import java.util.Date
 
 @Dao
 interface ReviewDao {
-    @Query("SELECT * FROM reviews ORDER BY timestamp DESC")
-    fun getAllReviews(): LiveData<List<ReviewEntity>>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReview(review: ReviewEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReviews(reviews: List<ReviewEntity>)
+
+    @Query("SELECT * FROM reviews WHERE id = :reviewId")
+    suspend fun getReviewById(reviewId: String): ReviewEntity?
+
+    @Query("SELECT * FROM reviews")
+    suspend fun getAllReviews(): List<ReviewEntity>
+
+    @Query("DELETE FROM reviews WHERE id = :reviewId")
+    suspend fun deleteReviewById(reviewId: String)
+
+    @Query("DELETE FROM reviews")
+    suspend fun clearAllReviews()
 }

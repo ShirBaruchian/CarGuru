@@ -22,15 +22,15 @@ import com.example.carguru.viewmodels.UserViewModel
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import com.example.carguru.data.local.UserEntity
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavHostController, profile: User, userViewModel: UserViewModel) {
+fun ProfileScreen(navController: NavHostController, profile: UserEntity, userViewModel: UserViewModel) {
     var isEditMode by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf(profile.username) }
     val email by remember { mutableStateOf(profile.email) }
-    var birthdate by remember { mutableStateOf(profile.birthdate) }
     val context = LocalContext.current
 
     Scaffold(
@@ -119,7 +119,6 @@ fun ProfileScreen(navController: NavHostController, profile: User, userViewModel
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "Birthday", fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
-            Text(text = birthdate, fontSize = 16.sp, modifier = Modifier.align(Alignment.Start))
             Spacer(modifier = Modifier.height(8.dp))
 
             if (isEditMode) {

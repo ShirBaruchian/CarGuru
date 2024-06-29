@@ -106,7 +106,7 @@ fun ReviewScreen(navController: NavHostController) {
     Column(modifier = Modifier.fillMaxSize().background(Color.Black).padding(16.dp)) {
         Header(navController)
         CarTitle()
-        ReviewList(reviews)
+        //ReviewList(reviews)
         Footer()
     }
 }
@@ -130,37 +130,37 @@ fun CarTitle() {
     Text(text = "Toyota corolla - 2022 - GLI", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 16.dp))
 }
 
-@Composable
-fun ReviewList(reviews: List<Review>) {
-    LazyColumn {
-        items(reviews) { review ->
-            ReviewItem(review)
-            Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-        }
-    }
-}
+//@Composable
+//fun ReviewList(reviews: List<Review>) {
+//    LazyColumn {
+//        items(reviews) { review ->
+//            ReviewItem(review)
+//            Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+//        }
+//    }
+//}
 
-@Composable
-fun ReviewItem(review: Review) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = review.name, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = review.date, color = Color.Gray, fontSize = 14.sp)
-            Text(text = review.text, color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(vertical = 8.dp))
-            Row {
-                repeat(review.rating) {
-                    Text(text = "⭐", color = Color.Yellow, fontSize = 16.sp)
-                }
-            }
-        }
+//@Composable
+//fun ReviewItem(review: Review) {
+//    Row(modifier = Modifier.fillMaxWidth()) {
+//        Column(modifier = Modifier.weight(1f)) {
+//            Text(text = review.name, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+//            Text(text = review.date, color = Color.Gray, fontSize = 14.sp)
+//            Text(text = review.text, color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(vertical = 8.dp))
+//            Row {
+//                repeat(review.rating) {
+//                    Text(text = "⭐", color = Color.Yellow, fontSize = 16.sp)
+//                }
+//            }
+//        }
 //        Image(
 //            painter = rememberImagePainter(review.imageUrl),
 //            contentDescription = null,
 //            modifier = Modifier.size(64.dp).padding(start = 8.dp),
 //            contentScale = ContentScale.Crop
 //        )
-    }
-}
+//    }
+//}
 
 @Composable
 fun Footer() {

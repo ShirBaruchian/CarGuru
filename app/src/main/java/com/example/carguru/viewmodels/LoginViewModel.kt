@@ -7,14 +7,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.runtime.mutableStateOf
+import com.example.carguru.data.local.UserEntity
+import com.example.carguru.data.repository.UserRepository
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 
-class LoginViewModel(): ViewModel() {
+class LoginViewModel(private val userRepository: UserRepository): ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
 
     var email: String by mutableStateOf("")
         private set
@@ -53,16 +55,16 @@ class LoginViewModel(): ViewModel() {
                     val user = firebaseAuth.currentUser
                     if (user != null) {
                         viewModelScope.launch {
-                            val userDoc = firestore.collection("users").document(user.uid).get().await()
-                            if (!userDoc.exists()) {
+                            val userDoc = userRepository.getUser(user.uid)
+                            if (userDoc == null) {
                                 // If user data does not exist, create a new document with basic details
-                                val newUser = User(user.uid,
+                                val newUser = UserEntity(user.uid,
                                     user.displayName ?: "Unknown",
                                     "",
                                     user.email ?: "Unknown",
-                                    ""
+                                    Date()
                                 )
-                                firestore.collection("users").document(user.uid).set(newUser).await()
+                                userRepository.saveUser(newUser)
                             }
                             callback(true)
                         }

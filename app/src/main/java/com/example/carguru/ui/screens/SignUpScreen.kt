@@ -89,11 +89,6 @@ fun SignUpScreen(navController: NavController, signUpViewModel: SignUpViewModel)
                     .padding(vertical = 8.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            DatePickerField(
-                label = "Birthdate",
-                selectedDate = signUpViewModel.birthdate,
-                onDateSelected = signUpViewModel::onBirthdateChange
-            )
             OutlinedTextField(
                 value = signUpViewModel.password,
                 onValueChange = {signUpViewModel.onPasswordChange(it)},

@@ -11,12 +11,15 @@ import com.example.carguru.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
+import com.example.carguru.data.local.UserEntity
+import com.example.carguru.data.repository.UserRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.launch
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
 
     var email: String by mutableStateOf("")
         private set
@@ -25,9 +28,6 @@ class SignUpViewModel : ViewModel() {
         private set
 
     var name: String by mutableStateOf("")
-        private set
-
-    var birthdate: String by mutableStateOf("")
         private set
 
     var errorMessage = mutableStateOf<String?>(null)
@@ -39,10 +39,6 @@ class SignUpViewModel : ViewModel() {
 
     fun onPasswordChange(newPassword: String) {
         password = newPassword
-    }
-
-    fun onBirthdateChange(newBirthdate: String) {
-        birthdate = newBirthdate
     }
 
     fun onNameChange(newName: String) {
@@ -65,11 +61,6 @@ class SignUpViewModel : ViewModel() {
     }
 
     fun onSignUpClick(onSuccess: () -> Unit) {
-        if (!isValidAge(birthdate)) {
-            errorMessage.value = "You must be at least 18 years old to sign up."
-            return
-        }
-
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -97,21 +88,23 @@ class SignUpViewModel : ViewModel() {
     }
 
     private fun saveUserDetails(user: FirebaseUser, onSuccess: () -> Unit) {
-        val userDetails = User(
-            user.uid,
-            name,
-            password,
-            email,
-            birthdate
-        )
-        firestore.collection("users").document(user.uid)
-            .set(userDetails)
-            .addOnCompleteListener{ task ->
-                if (task.isSuccessful) {
-                    onSuccess()
-                } else {
-                    errorMessage.value = task.exception?.message ?: "Failed to save user details"
-                }
+        viewModelScope.launch {
+            try {
+
+                val newUser = UserEntity(
+                    id = user.uid,
+                    username = name,
+                    email = email,
+                    password = password,
+                    lastUpdated = Date()
+                )
+                userRepository.saveUser(newUser)
+                onSuccess()
+
             }
+            catch (e: Exception) {
+                errorMessage.value = e.message ?: "Failed to save user details"
+            }
+        }
     }
 }
