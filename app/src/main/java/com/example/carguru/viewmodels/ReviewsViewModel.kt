@@ -16,10 +16,6 @@ class ReviewsViewModel : ViewModel() {
     private val _reviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
     val reviews: StateFlow<List<ReviewWithUser>> = _reviews
 
-    init {
-        fetchReviews()
-    }
-
     fun fetchReviews() {
         viewModelScope.launch {
             try {

@@ -20,10 +20,6 @@ class UserViewModel : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
-    init {
-        fetchUserDetails()
-    }
-
     fun fetchUserDetails() {
         viewModelScope.launch {
             try {

@@ -50,6 +50,11 @@ fun HomeScreen(
     val userName by userViewModel.userName.collectAsState()
 
     LaunchedEffect(Unit) {
+        userViewModel.fetchUserDetails()
+        reviewsViewModel.fetchReviews()
+    }
+
+    LaunchedEffect(Unit) {
         coroutineScope.launch {
             yearsState.items.value = viewModel.getYears()
         }
