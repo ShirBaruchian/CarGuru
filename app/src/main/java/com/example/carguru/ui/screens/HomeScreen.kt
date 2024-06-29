@@ -1,26 +1,24 @@
 package com.example.carguru.ui.screens
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.Alignment
 import kotlinx.coroutines.launch
-import com.example.carguru.viewmodels.CarRepository
-import com.example.carguru.services.DropdownState
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.navigation.NavController
-
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import com.example.carguru.services.DropdownState
+import androidx.compose.ui.text.style.TextOverflow
+import com.example.carguru.viewmodels.CarRepository
+import androidx.compose.material.icons.filled.ArrowDropDown
 
 @Composable
-fun HomeScreen(navController: NavController, userName: String, viewModel: CarRepository = viewModel()) {
+fun HomeScreen(navController: NavController, userName: String, viewModel: CarRepository) {
     val yearsState = remember { DropdownState<Int>() }
     val makesState = remember { DropdownState<String>() }
     val modelsState = remember { DropdownState<String>() }
@@ -78,7 +76,7 @@ fun HomeScreen(navController: NavController, userName: String, viewModel: CarRep
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.align(Alignment.Top)
             )
-            TextButton(onClick = {}) {
+            TextButton(onClick = {navController.navigate("profile")}) {
                 Text(
                     text = userName,
                     style = MaterialTheme.typography.bodyLarge,

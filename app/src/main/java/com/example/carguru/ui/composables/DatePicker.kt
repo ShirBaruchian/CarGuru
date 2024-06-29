@@ -1,18 +1,18 @@
 package com.example.carguru.ui.components
 
-import android.app.DatePickerDialog
+import java.util.*
 import android.widget.DatePicker
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import android.app.DatePickerDialog
+import androidx.compose.ui.Modifier
+import androidx.compose.material3.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import java.util.*
+import androidx.compose.foundation.layout.fillMaxWidth
 
 @Composable
 fun DatePickerField(

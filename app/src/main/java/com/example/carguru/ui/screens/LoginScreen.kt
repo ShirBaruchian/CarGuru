@@ -35,8 +35,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import androidx.compose.foundation.gestures.detectTapGestures
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
@@ -50,8 +50,8 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
         try {
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let {
-                loginViewModel.signInWithGoogle(it) { displayName ->
-                    navController.navigate("home/$displayName") {
+                loginViewModel.signInWithGoogle(it) {
+                    navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
@@ -111,8 +111,8 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     .padding(vertical = 8.dp)
             )
             Button(
-                onClick = { loginViewModel.onLoginClick() {displayName ->
-                    navController.navigate("home/$displayName") {
+                onClick = { loginViewModel.onLoginClick() {
+                    navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }} },
                 modifier = Modifier
