@@ -14,6 +14,9 @@ import kotlinx.coroutines.tasks.await
 class ReviewsViewModel(private val reviewRepository: ReviewRepository,
                        private val userRepository: UserRepository
 ) : ViewModel() {
+    private var _loading = MutableStateFlow(false)
+    var loading = _loading.asStateFlow()
+
     val reviews: StateFlow<List<ReviewWithUser>> = reviewRepository.getAllReviewsWithUser()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -21,7 +24,9 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
         reviewRepository.startListeningForUpdates(viewModelScope)
         viewModelScope.launch {
             try {
-                reviewRepository.syncReviews(viewModelScope)
+                _loading.value = true
+                reviewRepository.syncReviews()
+                _loading.value = false
             } catch (e: Exception) {
                 // Handle the exception
             }

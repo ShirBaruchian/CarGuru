@@ -50,4 +50,18 @@ class FirebaseUserService {
     suspend fun deleteUser(userId: String) {
         firestore.collection("users").document(userId).delete().await()
     }
+
+    suspend fun getUsersUpdatedAfter(date: Date): List<User> {
+        val users = mutableListOf<User>()
+        val querySnapshot = firestore.collection("users")
+            .whereGreaterThan("lastUpdated", date)
+            .get()
+            .await()
+
+        for (document in querySnapshot.documents) {
+            document.toObject(User::class.java)?.let { users.add(it) }
+        }
+
+        return users
+    }
 }

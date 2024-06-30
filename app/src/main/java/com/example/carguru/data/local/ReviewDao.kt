@@ -6,9 +6,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.carguru.data.local.ReviewEntity
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 @Dao
 interface ReviewDao {
+    @Query("SELECT MAX(lastUpdated) FROM reviews")
+    suspend fun getLatestUpdateDate(): Date?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReview(review: ReviewEntity)
 

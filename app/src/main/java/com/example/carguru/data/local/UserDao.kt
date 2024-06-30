@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.carguru.data.local.UserEntity
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 @Dao
 interface UserDao {
@@ -15,6 +16,9 @@ interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUsers(users: List<UserEntity>)
+
+    @Query("SELECT MAX(lastUpdated) FROM users")
+    suspend fun getLatestUpdateDate(): Date?
 
     @Query("SELECT * FROM users WHERE id = :userId")
     fun getUserById(userId: String): Flow<UserEntity?>

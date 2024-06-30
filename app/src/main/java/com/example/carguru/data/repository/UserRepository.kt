@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 class UserRepository(
     private val userDao: UserDao,
@@ -48,40 +49,12 @@ class UserRepository(
     }
 
     suspend fun syncUsers(scope: CoroutineScope) = withContext(Dispatchers.IO) {
-        val localUsers = userDao.getAllUsers().first()
-        val remoteUsers = firebaseUserService.getAllUsers()
+        val lastUpdateDate = userDao.getLatestUpdateDate() ?: Date(0) // Default to epoch if no date
 
-        val localUserMap = localUsers.associateBy { it.id }
-        val remoteUserMap = remoteUsers.associateBy { it.id }
+        val updatedUsers = firebaseUserService.getUsersUpdatedAfter(lastUpdateDate)
 
-        // Update or insert users from Firebase into Room
-        for (remoteUser in remoteUsers) {
-            val localUser = localUserMap[remoteUser.id]
-            if (localUser == null || localUser.lastUpdated.before(remoteUser.lastUpdated)) {
-                userDao.insertUser(remoteUser.toUserEntity())
-            }
-        }
-
-        // Update or insert users from Room into Firebase
-        for (localUser in localUsers) {
-            val remoteUser = remoteUserMap[localUser.id]
-            if (remoteUser == null || remoteUser.lastUpdated?.before(localUser.lastUpdated) != false) {
-                firebaseUserService.updateUser(localUser.toUser())
-            }
-        }
-
-        // Identify and delete users from Room that are no longer in Firebase
-        val remoteUserIds = remoteUsers.map { it.id }.toSet()
-        val usersToDeleteFromRoom = localUsers.filter { it.id !in remoteUserIds }
-        for (userToDelete in usersToDeleteFromRoom) {
-            userDao.deleteUserById(userToDelete.id)
-        }
-
-        // Identify and delete users from Firebase that are no longer in Room
-        val localUserIds = localUsers.map { it.id }.toSet()
-        val usersToDeleteFromFirebase = remoteUsers.filter { it.id !in localUserIds }
-        for (userToDelete in usersToDeleteFromFirebase) {
-            firebaseUserService.deleteUser(userToDelete.id)
+        if (updatedUsers.isNotEmpty()) {
+            userDao.insertUsers(updatedUsers.map { it.toUserEntity() })
         }
     }
 }
