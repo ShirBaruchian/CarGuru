@@ -9,6 +9,7 @@ import com.example.carguru.utils.toReviewEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -61,6 +62,15 @@ class ReviewRepository(
 
         if (updatedReviews.isNotEmpty()) {
             reviewDao.insertReviews(updatedReviews.map { it.toReviewEntity() })
+        }
+
+        // Step 3: Handle deletions
+        val allFirebaseReviews = firebaseReviewService.getAllReviews()
+        val localReviews = reviewDao.getAllReviews().first() // Collect the Flow to get the current value
+        val firebaseReviewIds = allFirebaseReviews.map { it.id }.toSet()
+        val reviewsToDelete = localReviews.filter { it.id !in firebaseReviewIds }
+        if (reviewsToDelete.isNotEmpty()) {
+            reviewDao.deleteReviewsByIds(reviewsToDelete.map { it.id })
         }
     }
 
