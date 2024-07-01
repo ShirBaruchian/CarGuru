@@ -1,5 +1,6 @@
 package com.example.carguru.models
 
+import com.example.carguru.data.local.ReviewEntity
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
@@ -32,6 +33,6 @@ data class User(
 )
 
 data class ReviewWithUser(
-    val review: Review,
+    val review: ReviewEntity,
     val username: String
 )

@@ -48,10 +48,10 @@ fun HomeScreen(
 
     val reviews by reviewsViewModel.reviews.collectAsState()
     val userName by userViewModel.userName.collectAsState()
+    val loading by reviewsViewModel.loading.collectAsState()
 
     LaunchedEffect(Unit) {
-        userViewModel.fetchUserDetails()
-        reviewsViewModel.fetchReviews()
+        userViewModel.fetchCurrentUser()
     }
 
     LaunchedEffect(Unit) {
@@ -178,22 +178,34 @@ fun HomeScreen(
                     Text("No trims available for the selected make, model, and year.", style = MaterialTheme.typography.bodySmall)
                 }
             }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f) // Use weight to take the remaining space
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
-            ) {
-                if (reviews.isEmpty()) {
-                    item {
-                        Text("No reviews available", style = MaterialTheme.typography.bodyLarge)
-                    }
-                } else {
-                    items(reviews) { reviewWithUser ->
-                        CompactReviewItem(reviewWithUser, navController)
-                        Divider()
-                    }
+            if (loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(48.dp) // size of the indicator
+                            .padding(16.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 4.dp
+                    )                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f) // Use weight to take the remaining space
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(16.dp)
+                ) {
+
+                        items(reviews) { reviewWithUser ->
+                            CompactReviewItem(reviewWithUser, navController)
+                            Divider()
+                        }
+
                 }
             }
         }

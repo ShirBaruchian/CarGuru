@@ -1,7 +1,8 @@
 package com.example.carguru.viewmodels
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.carguru.data.repository.ReviewRepository
+import com.example.carguru.data.repository.UserRepository
 import com.example.carguru.models.Review
 import com.example.carguru.models.ReviewWithUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,50 +11,43 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class ReviewsViewModel : ViewModel() {
-    private val firestore = FirebaseFirestore.getInstance()
+class ReviewsViewModel(private val reviewRepository: ReviewRepository,
+                       private val userRepository: UserRepository
+) : ViewModel() {
+    private var _loading = MutableStateFlow(false)
+    var loading = _loading.asStateFlow()
 
-    private val _reviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
-    val reviews: StateFlow<List<ReviewWithUser>> = _reviews
+    val reviews: StateFlow<List<ReviewWithUser>> = reviewRepository.getAllReviewsWithUser()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    fun fetchReviews() {
+    init {
+        reviewRepository.startListeningForUpdates(viewModelScope)
         viewModelScope.launch {
             try {
-                val query: Query = firestore.collection("reviews").orderBy("timestamp", Query.Direction.DESCENDING)
-
-                val reviewsSnapshot = query.get().await()
-                val reviews = if (reviewsSnapshot.isEmpty) {
-                    emptyList()
-                } else {
-                    reviewsSnapshot.documents.mapNotNull { document ->
-                        document.toObject(Review::class.java)?.copy(id = document.id)
-                    }
-                }
-
-                val userIds = reviews.map { it.userId }.distinct()
-                val userMap = mutableMapOf<String, String>()
-
-                for (userId in userIds) {
-                    val userSnapshot = firestore.collection("users").document(userId).get().await()
-                    val userName = userSnapshot.getString("username") ?: "Unknown"
-                    userMap[userId] = userName
-                }
-
-                val reviewsWithUserNames = reviews.map { review ->
-                    ReviewWithUser(review, userMap[review.userId] ?: "Unknown")
-                }
-
-                _reviews.value = reviewsWithUserNames
+                _loading.value = true
+                reviewRepository.syncReviews()
+                _loading.value = false
             } catch (e: Exception) {
-                // Handle the error, for example log it or update a separate error state
-                _reviews.value = emptyList()
+                // Handle the exception
             }
         }
     }
 
-    fun getReviewWithUser(reviewId: String): StateFlow<ReviewWithUser?> {
-        return _reviews.map { reviews ->
-            reviews.find { it.review.id == reviewId }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+    //fun fetchReviews() {
+    //    viewModelScope.launch {
+    //        val reviews = reviewRepository.getAllReviews()
+    //        val userIds = reviews.map { it.userId }.distinct()
+    //        val userMap = userIds.associateWith { userId ->
+    //            userRepository.getUser(userId)?.username ?: "Unknown"
+    //        }
+    //        reviews.value = reviews.map { review ->
+    //            ReviewWithUser(review, userMap[review.userId] ?: "Unknown")
+    //        }
+    //    }
+    //}
+
+    fun getReview(reviewId: String): StateFlow<ReviewWithUser?> {
+        return reviewRepository.getReview(reviewId)
+            .stateIn(viewModelScope, SharingStarted.Lazily, null)
     }
 }
