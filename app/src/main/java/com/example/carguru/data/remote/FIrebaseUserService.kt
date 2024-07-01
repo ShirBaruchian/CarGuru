@@ -9,18 +9,15 @@ import java.util.Date
 class FirebaseUserService {
     private val firestore = FirebaseFirestore.getInstance()
 
-    fun addUserListener(onUsersChanged: (List<User>) -> Unit): ListenerRegistration {
-        return firestore.collection("users")
+    fun addUserListener(onUserChange: (List<User>) -> Unit) {
+        firestore.collection("users")
             .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    // Handle error
+                if (e != null || snapshot == null) {
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null && !snapshot.isEmpty) {
-                    val users = snapshot.toObjects(User::class.java)
-                    onUsersChanged(users)
-                }
+                val users = snapshot.documents.mapNotNull { it.toObject(User::class.java) }
+                onUserChange(users)
             }
     }
 
@@ -44,6 +41,7 @@ class FirebaseUserService {
     }
 
     suspend fun updateUser(user: User) {
+        print("Updating user")
         firestore.collection("users").document(user.id).set(user).await()
     }
 

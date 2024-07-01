@@ -10,6 +10,7 @@ import com.example.carguru.data.repository.UserRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Date
@@ -26,7 +27,7 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val firestore = FirebaseFirestore.getInstance()
 
     init {
-        userRepository.startListeningForUpdates(viewModelScope)
+        userRepository.startListeningForUpdates()
         viewModelScope.launch {
             try {
 
@@ -62,16 +63,15 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     fun updateUserDetails(userId: String, newUsername: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                userRepository.getUser(userId).collect { user ->
-                    if (user != null) {
-                        val updatedUser = user.copy(username = newUsername, lastUpdated = Date())
-                        userRepository.saveUser(updatedUser)
-                        _user.value = updatedUser
-                        _userName.value = newUsername
-                        onSuccess()
-                    } else {
-                        onFailure("User not found")
-                    }
+                val user = userRepository.getUser(userId).first()
+                if (user != null) {
+                    val updatedUser = user.copy(username = newUsername, lastUpdated = Date())
+                    userRepository.saveUser(updatedUser)
+                    _user.value = updatedUser
+                    _userName.value = newUsername
+                    onSuccess()
+                } else {
+                    onFailure("User not found")
                 }
             } catch (e: Exception) {
                 onFailure(e.message ?: "Failed to update user details.")
