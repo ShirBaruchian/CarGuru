@@ -17,10 +17,18 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
     private var _loading = MutableStateFlow(false)
     var loading = _loading.asStateFlow()
 
-    val reviews: StateFlow<List<ReviewWithUser>> = reviewRepository.getAllReviewsWithUser()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    private var _reviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
+    private var _filteredReviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
+    var reviews: StateFlow<List<ReviewWithUser>> = _filteredReviews.asStateFlow()
+
+    // Filter criteria
+    private val _selectedYear = MutableStateFlow<String?>(null)
+    private val _selectedMake = MutableStateFlow<String?>(null)
+    private val _selectedModel = MutableStateFlow<String?>(null)
+    private val _selectedTrim = MutableStateFlow<String?>(null)
 
     init {
+        fetchReviews()
         reviewRepository.startListeningForUpdates(viewModelScope)
         viewModelScope.launch {
             try {
@@ -31,23 +39,53 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
                 // Handle the exception
             }
         }
+        combine(
+            _reviews,
+            _selectedYear,
+            _selectedMake,
+            _selectedModel,
+            _selectedTrim
+        ) { reviews, year, make, model, trim ->
+            reviews.filter { review ->
+                val matchesYear = year?.let { it == review.review.year } ?: true
+                val matchesMake = make?.let { it == review.review.manufacturer } ?: true
+                val matchesModel = model?.let { it == review.review.model } ?: true
+                val matchesTrim = trim?.let { it == review.review.trim } ?: true
+                matchesYear && matchesMake && matchesModel && matchesTrim
+            }
+        }.onEach { filteredReviews ->
+            _filteredReviews.value = filteredReviews
+        }.launchIn(viewModelScope)
     }
 
-    //fun fetchReviews() {
-    //    viewModelScope.launch {
-    //        val reviews = reviewRepository.getAllReviews()
-    //        val userIds = reviews.map { it.userId }.distinct()
-    //        val userMap = userIds.associateWith { userId ->
-    //            userRepository.getUser(userId)?.username ?: "Unknown"
-    //        }
-    //        reviews.value = reviews.map { review ->
-    //            ReviewWithUser(review, userMap[review.userId] ?: "Unknown")
-    //        }
-    //    }
-    //}
+    fun fetchReviews() {
+        viewModelScope.launch {
+            _loading.value = true
+            reviewRepository.getAllReviewsWithUser().collect { reviewList ->
+                _reviews.value = reviewList
+                _loading.value = false
+            }
+        }
+    }
 
     fun getReview(reviewId: String): StateFlow<ReviewWithUser?> {
         return reviewRepository.getReview(reviewId)
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
+    }
+
+    fun setYear(year: String?) {
+        _selectedYear.value = year
+    }
+
+    fun setMake(make: String?) {
+        _selectedMake.value = make
+    }
+
+    fun setModel(model: String?) {
+        _selectedModel.value = model
+    }
+
+    fun setTrim(trim: String?) {
+        _selectedTrim.value = trim
     }
 }

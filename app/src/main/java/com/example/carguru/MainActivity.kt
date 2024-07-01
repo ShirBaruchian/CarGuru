@@ -98,7 +98,8 @@ fun AppNavigation(startDestination: String, loginViewModel: LoginViewModel, sign
             HomeScreen(navController = navController, reviewsViewModel = reviewsViewModel, userViewModel, carViewModel) // Pass actual user name if available
         }
         composable("addReview") {
-            AddReviewScreen(navController = navController, addReviewViewModel = addReviewViewModel)
+            AddReviewScreen(navController = navController, addReviewViewModel = addReviewViewModel,
+                carViewModel)
         }
         composable(
             "reviewDetail/{reviewId}",

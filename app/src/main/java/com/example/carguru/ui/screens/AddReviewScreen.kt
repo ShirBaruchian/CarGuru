@@ -18,27 +18,36 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.carguru.services.DropdownState
+import com.example.carguru.ui.components.CarDropdowns
 import com.example.carguru.utils.hideKeyboard
 import com.example.carguru.viewmodels.AddReviewViewModel
+import com.example.carguru.viewmodels.CarRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewViewModel = viewModel()) {
+fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewViewModel = viewModel(),
+                    carRepository: CarRepository) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     var title by remember { mutableStateOf("") }
-    var manufacturer by remember { mutableStateOf("") }
-    var model by remember { mutableStateOf("") }
-    var year by remember { mutableStateOf("") }
-    var trim by remember { mutableStateOf("") }
+    val yearsState = remember { DropdownState<Int>() }
+    val makesState = remember { DropdownState<String>() }
+    val modelsState = remember { DropdownState<String>() }
+    val trimsState = remember { DropdownState<String>() }
     var rating by remember { mutableStateOf(0) }
     var reviewText by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
     val onAddReviewClicked = {
-        if (title.isNotEmpty() && manufacturer.isNotEmpty() && model.isNotEmpty() && year.isNotEmpty() && rating > 0 && reviewText.isNotEmpty()) {
+        if (title.isNotEmpty() && modelsState.selected.value.isNotEmpty()
+            && modelsState.selected.value.isNotEmpty() &&
+            yearsState.selected.value.isNotEmpty() && rating > 0 && reviewText.isNotEmpty()) {
             addReviewViewModel.addReview(
-                title, manufacturer, model, year, trim, rating, reviewText
+                title, makesState.selected.value,
+                modelsState.selected.value,
+                yearsState.selected.value,
+                trimsState.selected.value, rating, reviewText
             ) { error ->
                 if (error != null) {
                     errorMessage = error
@@ -89,32 +98,12 @@ fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewV
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = manufacturer,
-                onValueChange = { manufacturer = it },
-                label = { Text("Manufacturer") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = model,
-                onValueChange = { model = it },
-                label = { Text("Model") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = year,
-                onValueChange = { year = it },
-                label = { Text("Year") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = trim,
-                onValueChange = { trim = it },
-                label = { Text("Trim") },
-                modifier = Modifier.fillMaxWidth()
+            CarDropdowns(
+                yearsState = yearsState,
+                makesState = makesState,
+                modelsState = modelsState,
+                trimsState = trimsState,
+                carRepository
             )
             Spacer(modifier = Modifier.height(8.dp))
             RatingBar(rating = rating) { newRating -> rating = newRating }
