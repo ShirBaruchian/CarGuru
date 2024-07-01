@@ -1,32 +1,30 @@
 package com.example.carguru
 
+import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.activity.viewModels
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
+import androidx.activity.viewModels
+import androidx.navigation.navArgument
+import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.google.firebase.auth.FirebaseAuth
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.carguru.ui.screens.AddReviewScreen
 import com.example.carguru.ui.screens.HomeScreen
 import com.example.carguru.ui.theme.CarGuruTheme
 import com.example.carguru.ui.screens.LoginScreen
-import com.example.carguru.ui.screens.ReviewDetailScreen
 import com.example.carguru.ui.screens.SignUpScreen
-import com.example.carguru.viewmodels.AddReviewViewModel
 import com.example.carguru.ui.screens.ProfileScreen
 import com.example.carguru.viewmodels.CarRepository
 import com.example.carguru.viewmodels.UserViewModel
 import com.example.carguru.viewmodels.LoginViewModel
-import com.example.carguru.viewmodels.ReviewsViewModel
 import com.example.carguru.viewmodels.SignUpViewModel
+import com.example.carguru.ui.screens.AddReviewScreen
+import com.example.carguru.viewmodels.ReviewsViewModel
+import com.example.carguru.ui.screens.ReviewDetailScreen
 import androidx.navigation.compose.rememberNavController
+import com.example.carguru.viewmodels.AddReviewViewModel
 
 class MainActivity : ComponentActivity() {
     private val firebaseAuth = FirebaseAuth.getInstance()
@@ -39,7 +37,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        userViewModel.fetchUserDetails()
+//        userViewModel.fetchUserDetails()
         setContent {
             CarGuruTheme {
                 val currentUser = firebaseAuth.currentUser
@@ -54,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun AppNavigation(startDestination: String, loginViewModel: LoginViewModel, signUpViewModel: SignUpViewModel,
                   reviewsViewModel: ReviewsViewModel, userViewModel: UserViewModel,
@@ -61,8 +60,7 @@ fun AppNavigation(startDestination: String, loginViewModel: LoginViewModel, sign
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = startDestination) {
         composable("login") {
-            LoginScreen(navController = navController, loginViewModel = loginViewModel,
-                userViewModel = userViewModel)
+            LoginScreen(navController = navController, loginViewModel = loginViewModel)
         }
         composable("signup") {
             SignUpScreen(navController = navController, signUpViewModel = signUpViewModel)
