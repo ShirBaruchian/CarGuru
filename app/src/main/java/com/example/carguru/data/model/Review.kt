@@ -13,6 +13,7 @@ data class Review(
     val rating: Int = 0,
     val text: String = "",
     val userId: String = "",
+    val imageUrl: String? = "",
     @ServerTimestamp val timestamp: Date? = null,
     val lastUpdated: Date? = null
 )

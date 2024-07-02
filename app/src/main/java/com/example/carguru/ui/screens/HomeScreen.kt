@@ -1,5 +1,6 @@
 package com.example.carguru.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,8 +31,14 @@ import kotlinx.coroutines.launch
 import com.example.carguru.viewmodels.CarRepository
 import com.example.carguru.services.DropdownState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.navigation.NavController
 import com.example.carguru.ui.components.CarDropdowns
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,28 +186,13 @@ fun HomeScreen(
 }
 
 @Composable
-fun TrimCard(name: String, rating: Float, reviews: Int) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = name, style = MaterialTheme.typography.bodySmall)
-            Text(text = "$rating/5", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "$reviews Reviews", style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-}
-
-@Composable
 fun CompactReviewItem(
     reviewWithUser: ReviewWithUser,
     navController: NavController
 ) {
     val dateFormat = remember { SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm:ss a", Locale.getDefault()) }
     val formattedDate = reviewWithUser.review.timestamp?.let { dateFormat.format(it) } ?: "Unknown"
+
 
     Card(
         shape = RoundedCornerShape(8.dp),

@@ -1,4 +1,5 @@
 package com.example.carguru.viewmodels
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.carguru.data.repository.ReviewRepository
@@ -7,6 +8,7 @@ import com.example.carguru.models.Review
 import com.example.carguru.models.ReviewWithUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -16,6 +18,9 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
 ) : ViewModel() {
     private var _loading = MutableStateFlow(false)
     var loading = _loading.asStateFlow()
+
+    private val firestore = FirebaseFirestore.getInstance()
+    private val storageReference = FirebaseStorage.getInstance().reference
 
     private var _reviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
     private var _filteredReviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
@@ -87,5 +92,58 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
 
     fun setTrim(trim: String?) {
         _selectedTrim.value = trim
+    }
+
+    fun updateReview(
+        reviewId: String,
+        newTitle: String,
+        newText: String,
+        newImageUri: Uri?,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val reviewRef = firestore.collection("reviews").document(reviewId)
+                val reviewSnapshot = reviewRef.get().await()
+                if (reviewSnapshot.exists()) {
+                    val updates = mutableMapOf<String, Any>(
+                        "title" to newTitle,
+                        "text" to newText
+                    )
+                    newImageUri?.let { uri ->
+                        val imageRef = storageReference.child("reviewImages/$reviewId.jpg")
+                        imageRef.putFile(uri).await()
+                        val downloadUrl = imageRef.downloadUrl.await().toString()
+                        updates["imageUrl"] = downloadUrl
+                    }
+                    reviewRef.update(updates).await()
+                    onSuccess()
+                } else {
+                    onFailure("Review not found")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Failed to update review")
+            }
+        }
+    }
+
+    fun deleteReview(
+        reviewId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val reviewRef = firestore.collection("reviews").document(reviewId)
+                reviewRef.delete().await()
+                // Optionally delete the image from storage
+                val imageRef = storageReference.child("reviewImages/$reviewId.jpg")
+                imageRef.delete().await()
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Failed to delete review")
+            }
+        }
     }
 }

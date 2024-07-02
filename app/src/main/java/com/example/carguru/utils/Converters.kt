@@ -38,6 +38,7 @@ fun ReviewEntity.toReview(): Review {
         rating = this.rating,
         text = this.text,
         userId = this.userId,
+        imageUrl = this.imageUrl,
         timestamp = this.timestamp,
         lastUpdated = this.lastUpdated
     )
@@ -54,6 +55,7 @@ fun Review.toReviewEntity(): ReviewEntity {
         rating = this.rating,
         text = this.text,
         userId = this.userId,
+        imageUrl = this.imageUrl,
         timestamp = this.timestamp ?: Date(),
         lastUpdated = this.lastUpdated ?: Date()
     )

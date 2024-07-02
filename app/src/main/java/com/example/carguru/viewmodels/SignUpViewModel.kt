@@ -71,19 +71,15 @@ class SignUpViewModel(private val userRepository: UserRepository) : ViewModel() 
 
     private fun uploadProfileImage(uri: Uri, user: FirebaseUser, onSuccess: () -> Unit) {
         val profileImageRef = storageReference.child("profileImages/${user.uid}.jpg")
-        Log.d("SignUpViewModel", "Uploading image to: ${profileImageRef.path}")
         profileImageRef.putFile(uri)
             .addOnSuccessListener {
-                Log.d("SignUpViewModel", "Image upload successful")
                 profileImageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
                     updateProfile(user, downloadUrl.toString(), onSuccess)
                 }.addOnFailureListener { exception ->
-                    Log.e("SignUpViewModel", "Failed to get download URL", exception)
                     errorMessage.value = exception.message ?: "Failed to get download URL"
                 }
             }
             .addOnFailureListener { exception ->
-                Log.e("SignUpViewModel", "Image upload failed", exception)
                 errorMessage.value = exception.message ?: "Failed to upload profile image"
             }
     }
