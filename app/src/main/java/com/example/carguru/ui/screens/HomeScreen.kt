@@ -8,16 +8,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -27,13 +24,12 @@ import com.example.carguru.viewmodels.UserViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.compose.ui.Alignment
-import kotlinx.coroutines.launch
 import com.example.carguru.viewmodels.CarRepository
 import com.example.carguru.services.DropdownState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import com.example.carguru.ui.components.CarDropdowns
-import com.example.carguru.ui.components.FilterDialog
+import com.example.carguru.ui.components.CarFilterDialog
+import com.example.carguru.ui.components.ReviewFilter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,11 +39,6 @@ fun HomeScreen(
     userViewModel: UserViewModel = viewModel(),
     viewModel: CarRepository = viewModel()
 ) {
-    //val yearsState = remember { DropdownState<Int>() }
-    //val makesState = remember { DropdownState<String>() }
-    //val modelsState = remember { DropdownState<String>() }
-    //val trimsState = remember { DropdownState<String>() }
-    //val coroutineScope = rememberCoroutineScope()
 
     val reviews by reviewsViewModel.reviews.collectAsState()
     val userName by userViewModel.userName.collectAsState()
@@ -55,8 +46,29 @@ fun HomeScreen(
 
     var showDialog by remember { mutableStateOf(false) }
 
+    val yearsState = remember { DropdownState<Int>() }
+    val makesState = remember { DropdownState<String>() }
+    val modelsState = remember { DropdownState<String>() }
+    val trimsState = remember { DropdownState<String>() }
+
     LaunchedEffect(Unit) {
         userViewModel.fetchCurrentUser()
+    }
+
+    LaunchedEffect(yearsState.selected.value) {
+        reviewsViewModel.setYear(yearsState.selected.value)
+    }
+
+    LaunchedEffect(makesState.selected.value) {
+        reviewsViewModel.setMake(makesState.selected.value)
+    }
+
+    LaunchedEffect(modelsState.selected.value) {
+        reviewsViewModel.setModel(modelsState.selected.value)
+    }
+
+    LaunchedEffect(trimsState.selected.value) {
+        reviewsViewModel.setTrim(trimsState.selected.value)
     }
 
     Scaffold(
@@ -102,13 +114,26 @@ fun HomeScreen(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(16.dp)
             )
-            //CarDropdowns(
-            //    yearsState = yearsState,
-            //    makesState = makesState,
-            //    modelsState = modelsState,
-            //    trimsState = trimsState,
-            //    viewModel = viewModel
-            //)
+
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (yearsState.selected.value.isNotEmpty()) {
+                    ReviewFilter(text = yearsState.selected.value) { yearsState.selected.value = "" }
+                }
+                if (makesState.selected.value.isNotEmpty()) {
+                    ReviewFilter(text = makesState.selected.value) { makesState.selected.value = "" }
+                }
+                if (modelsState.selected.value.isNotEmpty()) {
+                    ReviewFilter(text = modelsState.selected.value) { modelsState.selected.value = "" }
+                }
+                if (trimsState.selected.value.isNotEmpty()) {
+                    ReviewFilter(text = trimsState.selected.value) { trimsState.selected.value = "" }
+                }
+            }
             if (loading) {
                 Box(
                     modifier = Modifier
@@ -122,7 +147,8 @@ fun HomeScreen(
                             .padding(16.dp),
                         color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 4.dp
-                    )                }
+                    )
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -139,7 +165,7 @@ fun HomeScreen(
 
                 }
             }
-            FilterDialog(
+            CarFilterDialog(
                 showDialog = showDialog,
                 onDismissRequest = { showDialog = false },
                 onFilterApplied = { year, make, model, trim ->
@@ -148,6 +174,10 @@ fun HomeScreen(
                     reviewsViewModel.setModel(model)
                     reviewsViewModel.setTrim(trim)
                 },
+                yearsState,
+                makesState,
+                modelsState,
+                trimsState,
                 carRepository = viewModel
             )
         }

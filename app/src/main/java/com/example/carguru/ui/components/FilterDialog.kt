@@ -10,10 +10,14 @@ import com.example.carguru.services.DropdownState
 import com.example.carguru.viewmodels.CarRepository
 
 @Composable
-fun FilterDialog(
+fun CarFilterDialog(
     showDialog: Boolean,
     onDismissRequest: () -> Unit,
     onFilterApplied: (year: String?, make: String?, model: String?, trim: String?) -> Unit,
+    yearsState: DropdownState<Int>,
+    makesState: DropdownState<String>,
+    modelsState: DropdownState<String>,
+    trimsState: DropdownState<String>,
     carRepository: CarRepository
 ) {
     if (showDialog) {
@@ -22,10 +26,6 @@ fun FilterDialog(
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surface
             ) {
-                val yearsState = remember { DropdownState<Int>() }
-                val makesState = remember { DropdownState<String>() }
-                val modelsState = remember { DropdownState<String>() }
-                val trimsState = remember { DropdownState<String>() }
 
                 Column(modifier = Modifier.padding(16.dp)) {
                     CarDropdowns(
