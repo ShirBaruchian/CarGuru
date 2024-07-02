@@ -75,8 +75,4 @@ class LoginViewModel(private val userRepository: UserRepository): ViewModel() {
                 }
             }
     }
-
-    fun onFacebookLoginClick() {
-        // Implement Facebook login logic here
-}
 }
