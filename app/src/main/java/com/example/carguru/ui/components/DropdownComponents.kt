@@ -70,7 +70,9 @@ fun DropdownMenuField(
         DropdownMenu(
             expanded = expandedState,
             onDismissRequest = { expandedState = false },
-            modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 200.dp)
         ) {
             options.forEach { option ->
                 DropdownMenuItem(

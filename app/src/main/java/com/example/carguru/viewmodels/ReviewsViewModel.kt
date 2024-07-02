@@ -51,10 +51,10 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
             _selectedTrim
         ) { reviews, year, make, model, trim ->
             reviews.filter { review ->
-                val matchesYear = year?.let { it == review.review.year } ?: true
-                val matchesMake = make?.let { it == review.review.manufacturer } ?: true
-                val matchesModel = model?.let { it == review.review.model } ?: true
-                val matchesTrim = trim?.let { it == review.review.trim } ?: true
+                val matchesYear = year?.let { it.isEmpty() || it == review.review.year } ?: true
+                val matchesMake = make?.let { it.isEmpty() || it == review.review.manufacturer } ?: true
+                val matchesModel = model?.let { it.isEmpty() || it == review.review.model } ?: true
+                val matchesTrim = trim?.let { it.isEmpty() || it == review.review.trim } ?: true
                 matchesYear && matchesMake && matchesModel && matchesTrim
             }
         }.onEach { filteredReviews ->

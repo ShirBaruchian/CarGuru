@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +33,7 @@ import com.example.carguru.services.DropdownState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.example.carguru.ui.components.CarDropdowns
+import com.example.carguru.ui.components.FilterDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,60 +43,20 @@ fun HomeScreen(
     userViewModel: UserViewModel = viewModel(),
     viewModel: CarRepository = viewModel()
 ) {
-    val yearsState = remember { DropdownState<Int>() }
-    val makesState = remember { DropdownState<String>() }
-    val modelsState = remember { DropdownState<String>() }
-    val trimsState = remember { DropdownState<String>() }
-    val coroutineScope = rememberCoroutineScope()
+    //val yearsState = remember { DropdownState<Int>() }
+    //val makesState = remember { DropdownState<String>() }
+    //val modelsState = remember { DropdownState<String>() }
+    //val trimsState = remember { DropdownState<String>() }
+    //val coroutineScope = rememberCoroutineScope()
 
     val reviews by reviewsViewModel.reviews.collectAsState()
     val userName by userViewModel.userName.collectAsState()
     val loading by reviewsViewModel.loading.collectAsState()
 
+    var showDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         userViewModel.fetchCurrentUser()
-    }
-
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            yearsState.items.value = viewModel.getYears()
-        }
-    }
-
-    LaunchedEffect(yearsState.selected.value) {
-        if (yearsState.selected.value.isNotEmpty()) {
-            reviewsViewModel.setYear(yearsState.selected.value)
-            coroutineScope.launch {
-                makesState.items.value = viewModel.getMakes(yearsState.selected.value.toInt())
-                makesState.selected.value = ""  // Reset selected make when year changes
-            }
-        }
-    }
-
-    LaunchedEffect(makesState.selected.value, yearsState.selected.value) {
-        if (makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
-            reviewsViewModel.setMake(makesState.selected.value)
-            coroutineScope.launch {
-                modelsState.items.value = viewModel.getModels(makesState.selected.value, yearsState.selected.value.toInt())
-                modelsState.selected.value = ""  // Reset selected model when make changes
-            }
-        }
-    }
-
-    LaunchedEffect(modelsState.selected.value, makesState.selected.value, yearsState.selected.value) {
-        if (modelsState.selected.value.isNotEmpty() && makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
-            reviewsViewModel.setModel(modelsState.selected.value)
-            coroutineScope.launch {
-                trimsState.items.value = viewModel.getTrims(makesState.selected.value, modelsState.selected.value, yearsState.selected.value.toInt())
-                trimsState.selected.value = ""  // Reset selected trim when model changes
-            }
-        }
-    }
-
-    LaunchedEffect(trimsState.selected.value, modelsState.selected.value, makesState.selected.value, yearsState.selected.value) {
-        if (modelsState.selected.value.isNotEmpty() && makesState.selected.value.isNotEmpty() && yearsState.selected.value.isNotEmpty()) {
-            reviewsViewModel.setModel(modelsState.selected.value)
-        }
     }
 
     Scaffold(
@@ -102,6 +64,9 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("Car Reviews") },
                 actions = {
+                    IconButton(onClick = { showDialog = true }) {
+                        Icon(Icons.Default.Menu, contentDescription = "Filter")
+                    }
                     IconButton(onClick = {navController.navigate("profile")}) {
                         Icon(imageVector = Icons.Default.AccountBox, contentDescription = "EditProfile")
                     }
@@ -137,13 +102,13 @@ fun HomeScreen(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(16.dp)
             )
-            CarDropdowns(
-                yearsState = yearsState,
-                makesState = makesState,
-                modelsState = modelsState,
-                trimsState = trimsState,
-                viewModel = viewModel
-            )
+            //CarDropdowns(
+            //    yearsState = yearsState,
+            //    makesState = makesState,
+            //    modelsState = modelsState,
+            //    trimsState = trimsState,
+            //    viewModel = viewModel
+            //)
             if (loading) {
                 Box(
                     modifier = Modifier
@@ -174,6 +139,17 @@ fun HomeScreen(
 
                 }
             }
+            FilterDialog(
+                showDialog = showDialog,
+                onDismissRequest = { showDialog = false },
+                onFilterApplied = { year, make, model, trim ->
+                    reviewsViewModel.setYear(year)
+                    reviewsViewModel.setMake(make)
+                    reviewsViewModel.setModel(model)
+                    reviewsViewModel.setTrim(trim)
+                },
+                carRepository = viewModel
+            )
         }
     }
 }
