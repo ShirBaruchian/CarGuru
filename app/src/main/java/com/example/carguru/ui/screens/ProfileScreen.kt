@@ -19,6 +19,8 @@ import com.example.carguru.data.model.User
 import androidx.compose.foundation.layout.*
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
@@ -31,18 +33,25 @@ import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.example.carguru.data.local.UserEntity
+import com.example.carguru.viewmodels.ReviewsViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavHostController, profile: UserEntity, userViewModel: UserViewModel) {
+fun ProfileScreen(navController: NavHostController, profile: UserEntity,
+                  userViewModel: UserViewModel, reviewsViewModel: ReviewsViewModel) {
     var isEditMode by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf(profile.username) }
     val email by remember { mutableStateOf(profile.email) }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     var profileImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
-    userViewModel.fetchCurrentUser()
+
+    val userReviews by reviewsViewModel.userReviews.collectAsState()
+
+    LaunchedEffect(profile.id) {
+        reviewsViewModel.fetchUserReviews(profile.id)
+    }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -188,6 +197,16 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity, userVie
                     modifier = Modifier.align(Alignment.Start)
                 )
                 Text(text = userName, fontSize = 16.sp, modifier = Modifier.align(Alignment.Start))
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Your Reviews", style = MaterialTheme.typography.titleMedium)
+
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(userReviews) { reviewWithUser ->
+                    CompactReviewItem(reviewWithUser, navController)
+                    Divider()
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))

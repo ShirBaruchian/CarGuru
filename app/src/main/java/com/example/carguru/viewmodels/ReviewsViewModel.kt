@@ -1,4 +1,5 @@
 package com.example.carguru.viewmodels
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.carguru.data.repository.ReviewRepository
@@ -20,6 +21,9 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
     private var _reviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
     private var _filteredReviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
     var reviews: StateFlow<List<ReviewWithUser>> = _filteredReviews.asStateFlow()
+
+    private val _userReviews = MutableStateFlow<List<ReviewWithUser>>(emptyList())
+    val userReviews: StateFlow<List<ReviewWithUser>> = _userReviews.asStateFlow()
 
     // Filter criteria
     private val _selectedYear = MutableStateFlow<String?>(null)
@@ -61,6 +65,7 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
     fun fetchReviews() {
         viewModelScope.launch {
             _loading.value = true
+            Log.d("ReviewsViewModel", "Fetching reviews")
             reviewRepository.getAllReviewsWithUser().collect { reviewList ->
                 _reviews.value = reviewList
                 _loading.value = false
@@ -87,5 +92,13 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository,
 
     fun setTrim(trim: String?) {
         _selectedTrim.value = trim
+    }
+
+    fun fetchUserReviews(userId: String) {
+        viewModelScope.launch {
+            reviewRepository.getReviewsByUserId(userId).collect { userReviewsList ->
+                _userReviews.value = userReviewsList
+            }
+        }
     }
 }
