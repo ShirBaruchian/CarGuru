@@ -1,6 +1,10 @@
 package com.example.carguru.ui.screens
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.carguru.R
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
@@ -22,6 +26,10 @@ import com.example.carguru.viewmodels.UserViewModel
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.graphics.asImageBitmap
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.example.carguru.data.local.UserEntity
 
 
@@ -31,7 +39,38 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity, userVie
     var isEditMode by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf(profile.username) }
     val email by remember { mutableStateOf(profile.email) }
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+    var profileImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
+    userViewModel.fetchCurrentUser()
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        profileImageUri = uri
+    }
+
+    LaunchedEffect(profileImageUri, profile.profileImageUrl) {
+        if (profileImageUri != null) {
+            profileImageBitmap = withContext(Dispatchers.IO) {
+                try {
+                    Picasso.get().load(profileImageUri).resize(100, 100).centerCrop().get()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
+        } else if (profile.profileImageUrl != null) {
+            profileImageBitmap = withContext(Dispatchers.IO) {
+                try {
+                    Picasso.get().load(profile.profileImageUrl).resize(100, 100).centerCrop().get()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -52,7 +91,8 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity, userVie
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding).padding(16.dp),
+                .padding(innerPadding)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
@@ -62,27 +102,36 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity, userVie
                     .background(Color.Black),
                 contentAlignment = Alignment.BottomEnd
             ) {
-                // Placeholder for the image
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background), // Replace with actual image loading logic
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                profileImageBitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } ?: run {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_background), // Placeholder image
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
                 if (isEditMode) {
                     IconButton(
                         onClick = {
-                            // Handle image edit action
-                            Toast.makeText(context, "Edit image clicked", Toast.LENGTH_SHORT).show()
+                            imagePickerLauncher.launch("image/*")
                         },
                         modifier = Modifier
                             .size(30.dp)
                             .background(Color.White, shape = CircleShape)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_google), // Replace with actual edit icon
+                            painter = painterResource(id = R.drawable.ic_launcher_background), // Replace with actual edit icon
                             contentDescription = "Edit Image",
                             tint = Color.Black
                         )
@@ -95,9 +144,10 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity, userVie
             Button(
                 onClick = {
                     if (isEditMode) {
-                        userViewModel.updateUserDetails(
+                        userViewModel.updateProfile(
                             profile.id,
                             newUsername = userName,
+                            newProfileImageUri = profileImageUri,
                             onSuccess = {
                                 isEditMode = false
                                 Toast.makeText(
@@ -117,8 +167,6 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity, userVie
             ) {
                 Text(text = if (isEditMode) "Save Profile" else "Edit Profile")
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Birthday", fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
             Spacer(modifier = Modifier.height(8.dp))
 
             if (isEditMode) {

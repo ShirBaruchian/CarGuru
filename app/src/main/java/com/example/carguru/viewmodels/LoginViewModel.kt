@@ -1,12 +1,10 @@
 package com.example.carguru.viewmodels
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.carguru.data.model.User
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.example.carguru.data.local.UserEntity
 import com.example.carguru.data.repository.UserRepository
 import com.google.firebase.auth.GoogleAuthProvider
@@ -18,36 +16,35 @@ import java.util.Date
 class LoginViewModel(private val userRepository: UserRepository): ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
 
-    var email: String by mutableStateOf("")
+    var email = mutableStateOf("")
         private set
 
-    var password: String by mutableStateOf("")
+    var password = mutableStateOf("")
         private set
 
     var errorMessage = mutableStateOf<String?>(null)
         private set
 
     fun onEmailChange(newEmail: String) {
-        email = newEmail
+        email.value = newEmail
     }
 
     fun onPasswordChange(newPassword: String) {
-        password = newPassword
+        password.value = newPassword
     }
 
-    fun onLoginClick(callback: (Boolean) -> Unit) {
-        firebaseAuth.signInWithEmailAndPassword(email, password)
+    fun onLoginClick(onSuccess: (Boolean) -> Unit) {
+        firebaseAuth.signInWithEmailAndPassword(email.value, password.value)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    callback(true)
+                    onSuccess(true)
                 } else {
                     errorMessage.value = task.exception?.message ?: "Log in failed"
-                    callback(false)
                 }
             }
     }
 
-    fun signInWithGoogle(idToken: String, callback: (Boolean) -> Unit){
+    fun signInWithGoogle(idToken: String, callback: (Boolean) -> Unit) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
@@ -62,7 +59,8 @@ class LoginViewModel(private val userRepository: UserRepository): ViewModel() {
                                     user.displayName ?: "Unknown",
                                     "",
                                     user.email ?: "Unknown",
-                                    Date()
+                                    Date(),
+                                    ""
                                 )
                                 userRepository.saveUser(newUser)
                             }
@@ -80,5 +78,5 @@ class LoginViewModel(private val userRepository: UserRepository): ViewModel() {
 
     fun onFacebookLoginClick() {
         // Implement Facebook login logic here
-    }
+}
 }

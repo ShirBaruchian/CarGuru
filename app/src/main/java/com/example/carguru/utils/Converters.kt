@@ -11,7 +11,8 @@ fun UserEntity.toUser(): User {
         username = this.username,
         email = this.email,
         password = this.password,
-        lastUpdated = this.lastUpdated
+        lastUpdated = this.lastUpdated,
+        profileImageUrl = this.profileImageUrl
     )
 }
 
@@ -21,7 +22,8 @@ fun User.toUserEntity(): UserEntity {
         username = this.username,
         email = this.email,
         password = this.password,
-        lastUpdated = this.lastUpdated ?: Date()
+        lastUpdated = this.lastUpdated ?: Date(),
+        profileImageUrl = this.profileImageUrl.toString()
     )
 }
 

@@ -10,5 +10,6 @@ data class UserEntity(
     val username: String,
     val email: String,
     val password: String,
-    val lastUpdated: Date
+    val lastUpdated: Date,
+    val profileImageUrl: String
 )
