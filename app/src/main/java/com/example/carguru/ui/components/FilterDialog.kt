@@ -33,7 +33,7 @@ fun CarFilterDialog(
                         makesState = makesState,
                         modelsState = modelsState,
                         trimsState = trimsState,
-                        viewModel = carRepository
+                        carRepository = carRepository
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
