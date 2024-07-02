@@ -9,7 +9,7 @@ data class Review(
     val manufacturer: String = "",
     val model: String = "",
     val year: String = "",
-    val trim: String = "",
+    val trim: String? = "",
     val rating: Int = 0,
     val text: String = "",
     val userId: String = "",

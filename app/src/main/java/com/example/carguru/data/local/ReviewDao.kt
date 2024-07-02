@@ -19,6 +19,9 @@ interface ReviewDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReviews(reviews: List<ReviewEntity>)
 
+    @Query("DELETE FROM reviews WHERE id IN (:reviewIds)")
+    suspend fun deleteReviewsByIds(reviewIds: List<String>)
+
     @Query("SELECT * FROM reviews WHERE id = :reviewId")
     fun getReviewById(reviewId: String): Flow<ReviewEntity?>
 

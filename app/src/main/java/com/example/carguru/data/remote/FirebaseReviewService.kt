@@ -17,7 +17,7 @@ class FirebaseReviewService {
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null && !snapshot.isEmpty) {
+                if (snapshot != null) {
                     val reviews = snapshot.toObjects(Review::class.java)
                     onReviewsChanged(reviews)
                 }

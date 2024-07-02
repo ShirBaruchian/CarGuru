@@ -74,5 +74,6 @@ class UserRepository(
             userDao.insertUsers(updatedUsers.map { it.toUserEntity() })
             isUpdatingFromFirebase = false
         }
+
     }
 }
