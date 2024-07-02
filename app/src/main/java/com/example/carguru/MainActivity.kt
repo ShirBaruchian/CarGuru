@@ -110,7 +110,8 @@ fun AppNavigation(startDestination: String, loginViewModel: LoginViewModel, sign
         composable("profile") {
             val user = userViewModel.user.value
             user?.let {
-                ProfileScreen(navController = navController, profile = it,userViewModel = userViewModel)
+                ProfileScreen(navController = navController, profile = it,userViewModel = userViewModel,
+                    reviewsViewModel = reviewsViewModel)
             }
         }
     }

@@ -168,24 +168,6 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     Text(text = "Continue with Google")
                 }
             }
-            TextButton(
-                onClick = { loginViewModel.onFacebookLoginClick() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_facebook),
-                        contentDescription = "Facebook",
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Continue with Facebook")
-                }
-            }
         }
     }
 }

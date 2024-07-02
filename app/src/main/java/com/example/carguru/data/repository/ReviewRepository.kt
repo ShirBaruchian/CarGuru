@@ -82,4 +82,13 @@ class ReviewRepository(
             }
         }
     }
+
+    fun getReviewsByUserId(userId: String): Flow<List<ReviewWithUser>> {
+        return reviewDao.getReviewsByUserId(userId).map { reviewEntities ->
+            reviewEntities.map { reviewEntity ->
+                val user = userRepository.getUser(reviewEntity.userId)?.firstOrNull()  // Assuming you have a method to get the user
+                ReviewWithUser(reviewEntity, user?.username ?: "Unknown")
+            }
+        }
+    }
 }

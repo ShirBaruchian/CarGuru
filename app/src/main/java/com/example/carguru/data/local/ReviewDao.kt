@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.example.carguru.data.local.ReviewEntity
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
@@ -33,4 +34,8 @@ interface ReviewDao {
 
     @Query("DELETE FROM reviews")
     suspend fun clearAllReviews()
+
+    @Transaction
+    @Query("SELECT * FROM reviews WHERE userId = :userId")
+    fun getReviewsByUserId(userId: String): Flow<List<ReviewEntity>>
 }
