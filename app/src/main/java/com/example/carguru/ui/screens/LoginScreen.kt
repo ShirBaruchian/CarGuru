@@ -32,7 +32,6 @@ import com.google.android.gms.common.api.ApiException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import com.example.carguru.viewmodels.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import androidx.compose.foundation.gestures.detectTapGestures
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -46,10 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
-fun LoginScreen(navController: NavController,
-                loginViewModel: LoginViewModel) {
+fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val context = LocalContext.current as Activity
     val focusManager = LocalFocusManager.current
+
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val googleSignInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -67,7 +66,6 @@ fun LoginScreen(navController: NavController,
             e.printStackTrace()
         }
     }
-
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -93,8 +91,16 @@ fun LoginScreen(navController: NavController,
                     .padding(bottom = 32.dp),
                 contentScale = ContentScale.Fit
             )
+            if (loginViewModel.errorMessage.value != null) {
+                Text(
+                    text = loginViewModel.errorMessage.value ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
             OutlinedTextField(
-                value = loginViewModel.email,
+                value = loginViewModel.email.value,
                 onValueChange = {loginViewModel.onEmailChange(it)},
                 label = { Text(text = "Email") },
                 modifier = Modifier
@@ -102,7 +108,7 @@ fun LoginScreen(navController: NavController,
                     .padding(vertical = 8.dp)
             )
             OutlinedTextField(
-                value = loginViewModel.password,
+                value = loginViewModel.password.value,
                 onValueChange = {loginViewModel.onPasswordChange(it)},
                 label = { Text(text = "Password") },
                 visualTransformation = PasswordVisualTransformation(),

@@ -1,6 +1,8 @@
 package com.example.carguru.viewmodels
 
 import java.util.Date
+import android.net.Uri
+import android.util.Log
 import java.util.Locale
 import java.util.Calendar
 import java.text.SimpleDateFormat
@@ -11,6 +13,8 @@ import com.example.carguru.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import androidx.compose.runtime.mutableStateOf
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import androidx.lifecycle.viewModelScope
 import com.example.carguru.data.local.UserEntity
 import com.example.carguru.data.repository.UserRepository
@@ -20,85 +24,102 @@ import kotlinx.coroutines.launch
 
 class SignUpViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
 
-    var email: String by mutableStateOf("")
+    var email = mutableStateOf("")
         private set
 
-    var password: String by mutableStateOf("")
+    var password = mutableStateOf("")
         private set
 
-    var name: String by mutableStateOf("")
+    var name = mutableStateOf("")
         private set
 
     var errorMessage = mutableStateOf<String?>(null)
         private set
 
     fun onEmailChange(newEmail: String) {
-        email = newEmail
+        email.value = newEmail
     }
 
     fun onPasswordChange(newPassword: String) {
-        password = newPassword
+        password.value = newPassword
     }
 
     fun onNameChange(newName: String) {
-        name = newName
+        name.value = newName
     }
 
-    private fun isValidAge(birthdate: String): Boolean {
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-        val birthDate: Date = sdf.parse(birthdate) ?: return false
-        val today = Calendar.getInstance()
-        val birthDay = Calendar.getInstance()
-        birthDay.time = birthDate
-
-        var age = today.get(Calendar.YEAR) - birthDay.get(Calendar.YEAR)
-        if (today.get(Calendar.DAY_OF_YEAR) < birthDay.get(Calendar.DAY_OF_YEAR)) {
-            age--
-        }
-
-        return age >= 18
-    }
-
-    fun onSignUpClick(onSuccess: () -> Unit) {
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
+    fun onSignUpClick(profileImageUri: Uri?,onSuccess: () -> Unit) {
+        firebaseAuth.createUserWithEmailAndPassword(email.value, password.value)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = task.result?.user
-                    user?.let { updateProfile(it, onSuccess) }
+                    user?.let {
+                        if (profileImageUri != null) {
+                            uploadProfileImage(profileImageUri, user, onSuccess)
+                        } else {
+                            updateProfile(user, null, onSuccess)
+                        }
+                    }
                 } else {
                     errorMessage.value = task.exception?.message ?: "Sign-Up failed"
                 }
             }
     }
 
-    private fun updateProfile(user: FirebaseUser, onSuccess: () -> Unit) {
+    private fun uploadProfileImage(uri: Uri, user: FirebaseUser, onSuccess: () -> Unit) {
+        val profileImageRef = storageReference.child("profileImages/${user.uid}.jpg")
+        Log.d("SignUpViewModel", "Uploading image to: ${profileImageRef.path}")
+        profileImageRef.putFile(uri)
+            .addOnSuccessListener {
+                Log.d("SignUpViewModel", "Image upload successful")
+                profileImageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                    updateProfile(user, downloadUrl.toString(), onSuccess)
+                }.addOnFailureListener { exception ->
+                    Log.e("SignUpViewModel", "Failed to get download URL", exception)
+                    errorMessage.value = exception.message ?: "Failed to get download URL"
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("SignUpViewModel", "Image upload failed", exception)
+                errorMessage.value = exception.message ?: "Failed to upload profile image"
+            }
+    }
+
+    private fun updateProfile(user: FirebaseUser, imageUrl: String?, onSuccess: () -> Unit) {
         val profileUpdates = UserProfileChangeRequest.Builder()
-            .setDisplayName(name)
+            .setDisplayName(name.value)
             .build()
 
         user.updateProfile(profileUpdates)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    saveUserDetails(user, onSuccess)
+                    saveUserDetails(user,imageUrl, onSuccess)
                 } else {
                     errorMessage.value = task.exception?.message ?: "Failed to update profile"
                 }
             }
     }
 
-    private fun saveUserDetails(user: FirebaseUser, onSuccess: () -> Unit) {
+    private fun saveUserDetails(user: FirebaseUser, imageUrl: String?, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
 
-                val newUser = UserEntity(
-                    id = user.uid,
-                    username = name,
-                    email = email,
-                    password = password,
-                    lastUpdated = Date()
-                )
-                userRepository.saveUser(newUser)
+                val newUser = imageUrl?.let {
+                    UserEntity(
+                        id = user.uid,
+                        username = name.value,
+                        email = email.value,
+                        password = password.value,
+                        lastUpdated = Date(),
+                        profileImageUrl = it
+                    )
+                }
+                if (newUser != null) {
+                    userRepository.saveUser(newUser)
+                }
                 onSuccess()
 
             }
