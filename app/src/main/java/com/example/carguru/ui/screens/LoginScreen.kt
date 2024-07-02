@@ -38,12 +38,18 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
 fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val context = LocalContext.current as Activity
     val focusManager = LocalFocusManager.current
+
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val googleSignInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -111,15 +117,25 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     .padding(vertical = 8.dp)
             )
             Button(
-                onClick = { loginViewModel.onLoginClick() {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
-                    }} },
+                onClick = { loginViewModel.onLoginClick() {success ->
+                    if (success) {
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    }
+                    else {
+                        errorMessage = loginViewModel.errorMessage.value ?: ""
+                    }
+                }} ,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             ) {
                 Text(text = "Log in")
+            }
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = it, color = MaterialTheme.colorScheme.error)
             }
             Spacer(modifier = Modifier.height(8.dp))
             TextButton(onClick = { navController.navigate("signup") }) {

@@ -72,6 +72,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:20.0.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.databinding:adapters:3.2.0-alpha11")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")

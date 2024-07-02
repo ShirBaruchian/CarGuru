@@ -2,15 +2,18 @@ package com.example.carguru.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.carguru.data.local.ReviewEntity
+import com.example.carguru.data.repository.ReviewRepository
 import com.example.carguru.models.Review
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.Date
+import java.util.UUID
 
-class AddReviewViewModel : ViewModel() {
+class AddReviewViewModel(private val reviewRepository: ReviewRepository) : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
 
     fun addReview(
         title: String, manufacturer: String, model: String, year: String, trim: String, rating: Int, reviewText: String, callback: (String?) -> Unit
@@ -19,19 +22,19 @@ class AddReviewViewModel : ViewModel() {
             try {
                 val userId = auth.currentUser?.uid
                 if (userId != null) {
-                    val newReviewRef = firestore.collection("reviews").document()
-                    val review = Review(
-                        id = newReviewRef.id,
-                        userId = userId,
+                    val newReview = ReviewEntity(
                         title = title,
                         manufacturer = manufacturer,
                         model = model,
                         year = year,
                         trim = trim,
                         rating = rating,
-                        text = reviewText
+                        text = reviewText,
+                        userId = userId,
+                        timestamp = Date(),
+                        lastUpdated = Date()
                     )
-                    newReviewRef.set(review).await()
+                    reviewRepository.saveReview(newReview)
                     callback(null)
                 }
             } catch (e: Exception) {

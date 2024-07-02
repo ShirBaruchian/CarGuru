@@ -30,19 +30,19 @@ import androidx.compose.ui.graphics.asImageBitmap
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.example.carguru.data.local.UserEntity
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavHostController, profile: User, userViewModel: UserViewModel) {
+fun ProfileScreen(navController: NavHostController, profile: UserEntity, userViewModel: UserViewModel) {
     var isEditMode by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf(profile.username) }
     val email by remember { mutableStateOf(profile.email) }
-    var birthdate by remember { mutableStateOf(profile.birthdate) }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     var profileImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
-    userViewModel.fetchUserDetails()
+    userViewModel.fetchCurrentUser()
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -131,7 +131,7 @@ fun ProfileScreen(navController: NavHostController, profile: User, userViewModel
                             .background(Color.White, shape = CircleShape)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_google), // Replace with actual edit icon
+                            painter = painterResource(id = R.drawable.ic_launcher_background), // Replace with actual edit icon
                             contentDescription = "Edit Image",
                             tint = Color.Black
                         )
@@ -144,9 +144,10 @@ fun ProfileScreen(navController: NavHostController, profile: User, userViewModel
             Button(
                 onClick = {
                     if (isEditMode) {
-                        userViewModel.updateUserDetails(
+                        userViewModel.updateProfile(
                             profile.id,
                             newUsername = userName,
+                            newProfileImageUri = profileImageUri,
                             onSuccess = {
                                 isEditMode = false
                                 Toast.makeText(
@@ -166,9 +167,6 @@ fun ProfileScreen(navController: NavHostController, profile: User, userViewModel
             ) {
                 Text(text = if (isEditMode) "Save Profile" else "Edit Profile")
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Birthday", fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
-            Text(text = birthdate, fontSize = 16.sp, modifier = Modifier.align(Alignment.Start))
             Spacer(modifier = Modifier.height(8.dp))
 
             if (isEditMode) {

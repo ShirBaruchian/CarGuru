@@ -24,22 +24,50 @@ import com.example.carguru.ui.screens.AddReviewScreen
 import com.example.carguru.viewmodels.ReviewsViewModel
 import com.example.carguru.ui.screens.ReviewDetailScreen
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
+import com.example.carguru.data.local.AppDatabase
+import com.example.carguru.data.remote.FirebaseReviewService
+import com.example.carguru.data.remote.FirebaseUserService
+import com.example.carguru.data.repository.ReviewRepository
+import com.example.carguru.data.repository.UserRepository
 import com.example.carguru.viewmodels.AddReviewViewModel
 
 class MainActivity : ComponentActivity() {
     private val firebaseAuth = FirebaseAuth.getInstance()
-    private val loginViewModel: LoginViewModel by viewModels()
-    private val signUpViewModel: SignUpViewModel by viewModels()
-    private val reviewsViewModel: ReviewsViewModel by viewModels()
-    private val addReviewViewModel: AddReviewViewModel by viewModels()
-    private val userViewModel: UserViewModel by viewModels()
-    private val carViewModel: CarRepository by viewModels()
+    private lateinit var userViewModel: UserViewModel
+    private lateinit var reviewsViewModel: ReviewsViewModel
+    private lateinit var loginViewModel: LoginViewModel
+    private lateinit var signUpViewModel: SignUpViewModel
+    private lateinit var addReviewViewModel: AddReviewViewModel
+    private lateinit var carViewModel: CarRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        userViewModel.fetchUserDetails()
+
+
+        val database = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "app_database"
+        ).fallbackToDestructiveMigration().build()
+        // Initialize Firebase services
+        val firebaseUserService = FirebaseUserService()
+        val firebaseReviewService = FirebaseReviewService()
+
+        // Initialize repositories
+        val userRepository = UserRepository(database.userDao(), firebaseUserService)
+        val reviewRepository = ReviewRepository(database.reviewDao(), firebaseReviewService, userRepository)
+
+        userViewModel = UserViewModel(userRepository)
+        reviewsViewModel = ReviewsViewModel(reviewRepository, userRepository)
+        loginViewModel = LoginViewModel(userRepository)
+        signUpViewModel = SignUpViewModel(userRepository)
+        addReviewViewModel = AddReviewViewModel(reviewRepository)
+        carViewModel = CarRepository()
+        userViewModel.fetchCurrentUser()
         setContent {
             CarGuruTheme {
+
                 val currentUser = firebaseAuth.currentUser
                 val startDestination = if (currentUser != null) "home" else "login"
                 AppNavigation(startDestination, loginViewModel, signUpViewModel,

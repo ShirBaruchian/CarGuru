@@ -15,10 +15,14 @@ import com.google.firebase.auth.FirebaseUser
 import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import androidx.lifecycle.viewModelScope
+import com.example.carguru.data.local.UserEntity
+import com.example.carguru.data.repository.UserRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.launch
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
@@ -32,9 +36,6 @@ class SignUpViewModel : ViewModel() {
     var name = mutableStateOf("")
         private set
 
-    var birthdate = mutableStateOf("")
-        private set
-
     var errorMessage = mutableStateOf<String?>(null)
         private set
 
@@ -46,34 +47,11 @@ class SignUpViewModel : ViewModel() {
         password.value = newPassword
     }
 
-    fun onBirthdateChange(newBirthdate: String) {
-        birthdate.value = newBirthdate
-    }
-
     fun onNameChange(newName: String) {
         name.value = newName
     }
-    private fun isValidAge(birthdate: String): Boolean {
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-        val birthDate: Date = sdf.parse(birthdate) ?: return false
-        val today = Calendar.getInstance()
-        val birthDay = Calendar.getInstance()
-        birthDay.time = birthDate
 
-        var age = today.get(Calendar.YEAR) - birthDay.get(Calendar.YEAR)
-        if (today.get(Calendar.DAY_OF_YEAR) < birthDay.get(Calendar.DAY_OF_YEAR)) {
-            age--
-        }
-
-        return age >= 18
-    }
-
-    fun onSignUpClick(profileImageUri: Uri?, onSuccess: () -> Unit) {
-        if (!isValidAge(birthdate.value)) {
-            errorMessage.value = "You must be at least 18 years old to sign up."
-            return
-        }
-
+    fun onSignUpClick(profileImageUri: Uri?,onSuccess: () -> Unit) {
         firebaseAuth.createUserWithEmailAndPassword(email.value, password.value)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -113,13 +91,12 @@ class SignUpViewModel : ViewModel() {
     private fun updateProfile(user: FirebaseUser, imageUrl: String?, onSuccess: () -> Unit) {
         val profileUpdates = UserProfileChangeRequest.Builder()
             .setDisplayName(name.value)
-            .setPhotoUri(imageUrl?.let { Uri.parse(it) })
             .build()
 
         user.updateProfile(profileUpdates)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    saveUserDetails(user, imageUrl, onSuccess)
+                    saveUserDetails(user,imageUrl, onSuccess)
                 } else {
                     errorMessage.value = task.exception?.message ?: "Failed to update profile"
                 }
@@ -127,22 +104,28 @@ class SignUpViewModel : ViewModel() {
     }
 
     private fun saveUserDetails(user: FirebaseUser, imageUrl: String?, onSuccess: () -> Unit) {
-        val userDetails = User(
-            id = user.uid,
-            username = name.value,
-            password = password.value,
-            email = email.value,
-            birthdate = birthdate.value,
-            profileImageUrl = imageUrl
-        )
-        firestore.collection("users").document(user.uid)
-            .set(userDetails)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onSuccess()
-                } else {
-                    errorMessage.value = task.exception?.message ?: "Failed to save user details"
+        viewModelScope.launch {
+            try {
+
+                val newUser = imageUrl?.let {
+                    UserEntity(
+                        id = user.uid,
+                        username = name.value,
+                        email = email.value,
+                        password = password.value,
+                        lastUpdated = Date(),
+                        profileImageUrl = it
+                    )
                 }
+                if (newUser != null) {
+                    userRepository.saveUser(newUser)
+                }
+                onSuccess()
+
             }
+            catch (e: Exception) {
+                errorMessage.value = e.message ?: "Failed to save user details"
+            }
+        }
     }
 }
