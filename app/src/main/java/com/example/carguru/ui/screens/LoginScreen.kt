@@ -9,11 +9,15 @@ import androidx.compose.material3.Text
 import androidx.compose.foundation.Image
 import androidx.compose.material3.Button
 import androidx.navigation.NavController
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.TextButton
 import com.example.carguru.utils.hideKeyboard
 import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.size
@@ -38,10 +42,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable

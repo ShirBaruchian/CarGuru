@@ -1,12 +1,11 @@
 package com.example.carguru.data.local
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import com.example.carguru.data.local.UserEntity
-import kotlinx.coroutines.flow.Flow
 import java.util.Date
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Insert
+import kotlinx.coroutines.flow.Flow
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface UserDao {
