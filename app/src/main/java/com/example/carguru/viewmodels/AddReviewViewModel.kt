@@ -1,15 +1,15 @@
 package com.example.carguru.viewmodels
 
-import android.net.Uri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.carguru.data.local.ReviewEntity
-import com.example.carguru.data.repository.ReviewRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
+import android.net.Uri
+import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.FirebaseStorage
+import com.example.carguru.data.local.ReviewEntity
+import com.example.carguru.data.repository.ReviewRepository
 
 class AddReviewViewModel(private val reviewRepository: ReviewRepository) : ViewModel() {
     private val auth = FirebaseAuth.getInstance()

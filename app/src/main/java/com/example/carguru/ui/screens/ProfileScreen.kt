@@ -1,39 +1,38 @@
 package com.example.carguru.ui.screens
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import com.example.carguru.R
+import android.graphics.Bitmap
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
+import com.squareup.picasso.Picasso
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
-import com.example.carguru.data.model.User
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.background
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import com.example.carguru.data.local.UserEntity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.lazy.LazyColumn
 import com.example.carguru.viewmodels.UserViewModel
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.ui.graphics.asImageBitmap
-import com.squareup.picasso.Picasso
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import com.example.carguru.data.local.UserEntity
 import com.example.carguru.viewmodels.ReviewsViewModel
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
 
 
 @OptIn(ExperimentalMaterial3Api::class)

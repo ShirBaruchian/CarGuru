@@ -1,20 +1,17 @@
 package com.example.carguru.data.repository
 
-import android.util.Log
-import com.example.carguru.data.local.UserDao
-import com.example.carguru.data.local.UserEntity
-import com.example.carguru.data.model.User
-import com.example.carguru.data.remote.FirebaseUserService
-import com.example.carguru.utils.toUser
-import com.example.carguru.utils.toUserEntity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Date
+import android.util.Log
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.example.carguru.utils.toUser
+import kotlinx.coroutines.CoroutineScope
+import com.example.carguru.data.local.UserDao
+import com.example.carguru.utils.toUserEntity
+import com.example.carguru.data.local.UserEntity
+import com.example.carguru.data.remote.FirebaseUserService
 
 class UserRepository(
     private val userDao: UserDao,
@@ -22,7 +19,6 @@ class UserRepository(
 ) {
     @Volatile
     private var isUpdatingFromFirebase = false
-
 
     fun startListeningForUpdates() {
         firebaseUserService.addUserListener { users ->
@@ -38,10 +34,6 @@ class UserRepository(
     private suspend fun updateLocalDatabase(users: List<UserEntity>) {
         userDao.clearAllUsers()
         userDao.insertUsers(users)
-    }
-
-    fun getAllUsers(): Flow<List<UserEntity>> {
-        return userDao.getAllUsers()
     }
 
     fun getUser(userId: String): Flow<UserEntity?> {
@@ -67,6 +59,5 @@ class UserRepository(
             userDao.insertUsers(updatedUsers.map { it.toUserEntity() })
             isUpdatingFromFirebase = false
         }
-
     }
 }
