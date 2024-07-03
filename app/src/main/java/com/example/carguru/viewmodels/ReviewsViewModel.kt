@@ -67,6 +67,11 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository
         }.launchIn(viewModelScope)
     }
 
+    fun getReview(reviewId: String): StateFlow<ReviewWithUser?> {
+        return reviewRepository.getReview(reviewId)
+            .stateIn(viewModelScope, SharingStarted.Lazily, null)
+    }
+
     fun fetchReview(reviewId: String) {
         viewModelScope.launch {
             reviewRepository.getReview(reviewId).collect { review ->
