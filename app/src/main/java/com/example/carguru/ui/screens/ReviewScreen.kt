@@ -198,8 +198,8 @@ fun ReviewDetailScreen(
                         onClick = {
                             reviewsViewModel.updateReview(
                                 reviewId,
-                                newTitle = if (editedTitle.text.isNotBlank()) editedTitle.text else review.review.title,
-                                newText = if (editedText.text.isNotBlank()) editedText.text else review.review.text,
+                                newTitle = editedTitle.text,
+                                newText = editedText.text,
                                 newImageUri = editedImageUri,
                                 onSuccess = {
                                     Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT).show()
