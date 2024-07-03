@@ -30,4 +30,7 @@ interface UserDao {
 
     @Query("DELETE FROM users")
     suspend fun clearAllUsers()
+
+    @Query("DELETE FROM users WHERE id NOT IN (:userIds)")
+    suspend fun deleteUsersNotIn(userIds: List<String>)
 }

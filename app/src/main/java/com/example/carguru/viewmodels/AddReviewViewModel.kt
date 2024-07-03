@@ -67,7 +67,7 @@ class AddReviewViewModel(private val reviewRepository: ReviewRepository) : ViewM
                             rating,
                             reviewText,
                             userId,
-                            null,
+                            "",
                             callback
                         )
                     }

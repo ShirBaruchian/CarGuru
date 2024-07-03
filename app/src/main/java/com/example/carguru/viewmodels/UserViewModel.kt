@@ -38,7 +38,7 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
         viewModelScope.launch {
             try {
 
-                userRepository.syncUsers(viewModelScope)
+                userRepository.syncUsers()
             } catch (e: Exception) {
                 Log.e("UserViewModel", "Failed to sync user data", e)
             }
