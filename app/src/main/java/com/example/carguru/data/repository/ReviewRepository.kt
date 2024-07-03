@@ -3,7 +3,7 @@ package com.example.carguru.data.repository
 import com.example.carguru.data.local.ReviewDao
 import com.example.carguru.data.local.ReviewEntity
 import com.example.carguru.data.remote.FirebaseReviewService
-import com.example.carguru.models.ReviewWithUser
+import com.example.carguru.data.model.ReviewWithUser
 import com.example.carguru.utils.toReview
 import com.example.carguru.utils.toReviewEntity
 import kotlinx.coroutines.CoroutineScope
@@ -35,10 +35,6 @@ class ReviewRepository(
     private suspend fun updateLocalDatabase(reviews: List<ReviewEntity>) {
         reviewDao.clearAllReviews()
         reviewDao.insertReviews(reviews)
-    }
-
-    fun getAllReviews(): Flow<List<ReviewEntity>> {
-        return reviewDao.getAllReviews()
     }
 
     fun getAllReviewsWithUser(): Flow<List<ReviewWithUser>> {
