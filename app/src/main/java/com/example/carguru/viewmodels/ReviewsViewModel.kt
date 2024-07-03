@@ -17,6 +17,9 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository
     private var _loading = MutableStateFlow(false)
     var loading = _loading.asStateFlow()
 
+    private val _reviewWithUser = MutableStateFlow<ReviewWithUser?>(null)
+    val reviewWithUser: StateFlow<ReviewWithUser?> = _reviewWithUser
+
     private val firestore = FirebaseFirestore.getInstance()
     private val storageReference = FirebaseStorage.getInstance().reference
 
@@ -64,6 +67,14 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository
         }.launchIn(viewModelScope)
     }
 
+    fun fetchReview(reviewId: String) {
+        viewModelScope.launch {
+            reviewRepository.getReview(reviewId).collect { review ->
+                _reviewWithUser.value = review
+            }
+        }
+    }
+
     fun fetchReviews() {
         viewModelScope.launch {
             _loading.value = true
@@ -73,11 +84,6 @@ class ReviewsViewModel(private val reviewRepository: ReviewRepository
                 _loading.value = false
             }
         }
-    }
-
-    fun getReview(reviewId: String): StateFlow<ReviewWithUser?> {
-        return reviewRepository.getReview(reviewId)
-            .stateIn(viewModelScope, SharingStarted.Lazily, null)
     }
 
     fun setYear(year: String?) {

@@ -1,20 +1,14 @@
 package com.example.carguru.ui.screens
 
-import java.util.*
 import android.net.Uri
 import android.widget.Toast
-import com.example.carguru.R
 import androidx.compose.runtime.*
-import java.text.SimpleDateFormat
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
-import com.squareup.picasso.Picasso
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.navigation.NavController
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
@@ -26,14 +20,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.ui.text.input.TextFieldValue
-import com.example.carguru.viewmodels.ReviewsViewModel
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.text.input.TextFieldValue
+import com.example.carguru.R
+import com.example.carguru.viewmodels.ReviewsViewModel
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,15 +42,28 @@ fun ReviewDetailScreen(
     reviewId: String,
     reviewsViewModel: ReviewsViewModel
 ) {
-    val reviewWithUser by reviewsViewModel.getReview(reviewId).collectAsState(initial = null)
+    val reviewWithUser by reviewsViewModel.reviewWithUser.collectAsState()
+
+    val context = LocalContext.current
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
     var isEditMode by remember { mutableStateOf(false) }
+
     var editedTitle by remember { mutableStateOf(TextFieldValue("")) }
     var editedText by remember { mutableStateOf(TextFieldValue("")) }
     var editedImageUri by remember { mutableStateOf<Uri?>(null) }
     var editedImageBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
-    val context = LocalContext.current
 
-    val currentUser = FirebaseAuth.getInstance().currentUser
+    LaunchedEffect(reviewId) {
+        reviewsViewModel.fetchReview(reviewId)
+    }
+
+    LaunchedEffect(reviewWithUser) {
+        reviewWithUser?.let { review ->
+            editedTitle = TextFieldValue(review.review.title)
+            editedText = TextFieldValue(review.review.text)
+        }
+    }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -74,7 +87,7 @@ fun ReviewDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { if (isEditMode) Text("Review Details") else Text("Edit Review") },
+                title = { if (isEditMode) Text("Edit Review") else Text("Review Details") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -106,16 +119,16 @@ fun ReviewDetailScreen(
                         value = editedTitle,
                         onValueChange = { editedTitle = it },
                         label = { Text("Title") },
-                        placeholder = { Text(review.review.title) },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = editedText,
                         onValueChange = { editedText = it },
                         label = { Text("Review Text") },
-                        placeholder = { Text(review.review.text) },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -181,39 +194,57 @@ fun ReviewDetailScreen(
                 )
                 if (isEditMode && currentUser?.uid == review.review.userId) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        reviewsViewModel.updateReview(
-                            reviewId,
-                            newTitle = if (editedTitle.text.isNotBlank()) editedTitle.text else review.review.title,
-                            newText = if (editedText.text.isNotBlank()) editedText.text else review.review.text,
-                            newImageUri = editedImageUri,
-                            onSuccess = {
-                                Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT).show()
-                                isEditMode = false
-                            },
-                            onFailure = { error ->
-                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-                            }
-                        )
-                    }) {
-                        Text("Save Changes")
+                    Button(
+                        onClick = {
+                            reviewsViewModel.updateReview(
+                                reviewId,
+                                newTitle = if (editedTitle.text.isNotBlank()) editedTitle.text else review.review.title,
+                                newText = if (editedText.text.isNotBlank()) editedText.text else review.review.text,
+                                newImageUri = editedImageUri,
+                                onSuccess = {
+                                    Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT).show()
+                                    isEditMode = false
+                                },
+                                onFailure = { error ->
+                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+                    ) {
+                        Text("Save Changes", fontSize = 16.sp)
                     }
-                }
-                if (isEditMode && currentUser?.uid == review.review.userId) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        reviewsViewModel.deleteReview(
-                            reviewId,
-                            onSuccess = {
-                                Toast.makeText(context, "Review deleted successfully", Toast.LENGTH_SHORT).show()
-                                navController.navigateUp()
-                            },
-                            onFailure = { error ->
-                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-                            }
-                        )
-                    }) {
-                        Text("Delete Review")
+                    Button(
+                        onClick = {
+                            reviewsViewModel.deleteReview(
+                                reviewId,
+                                onSuccess = {
+                                    Toast.makeText(context, "Review deleted successfully", Toast.LENGTH_SHORT).show()
+                                    navController.navigateUp()
+                                },
+                                onFailure = { error ->
+                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+                    ) {
+                        Text("Delete Review", fontSize = 16.sp)
                     }
                 }
             }
