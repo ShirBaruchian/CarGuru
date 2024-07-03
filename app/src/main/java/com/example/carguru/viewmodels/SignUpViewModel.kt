@@ -51,7 +51,7 @@ class SignUpViewModel(private val userRepository: UserRepository) : ViewModel() 
                         if (profileImageUri != null) {
                             uploadProfileImage(profileImageUri, user, onSuccess)
                         } else {
-                            updateProfile(user, null, onSuccess)
+                            updateProfile(user, "", onSuccess)
                         }
                     }
                 } else {

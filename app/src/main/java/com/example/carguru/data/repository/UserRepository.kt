@@ -48,16 +48,16 @@ class UserRepository(
         }
     }
 
-    suspend fun syncUsers(scope: CoroutineScope) = withContext(Dispatchers.IO) {
-        Log.d("UserRepository", "Syncing users")
+    suspend fun syncUsers() = withContext(Dispatchers.IO) {
         val lastUpdateDate = userDao.getLatestUpdateDate() ?: Date(0) // Default to epoch if no date
 
         val updatedUsers = firebaseUserService.getUsersUpdatedAfter(lastUpdateDate)
 
         if (updatedUsers.isNotEmpty()) {
-            isUpdatingFromFirebase = true
             userDao.insertUsers(updatedUsers.map { it.toUserEntity() })
-            isUpdatingFromFirebase = false
+
+            val firebaseUserIds = updatedUsers.map { it.id }
+            userDao.deleteUsersNotIn(firebaseUserIds)
         }
     }
 }
