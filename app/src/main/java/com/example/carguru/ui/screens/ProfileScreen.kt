@@ -69,7 +69,7 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity,
                     null
                 }
             }
-        } else if (profile.profileImageUrl != null) {
+        } else {
             profileImageBitmap = withContext(Dispatchers.IO) {
                 try {
                     Picasso.get().load(profile.profileImageUrl).resize(100, 100).centerCrop().get()
@@ -122,7 +122,7 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity,
                     )
                 } ?: run {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background), // Placeholder image
+                        painter = painterResource(id = R.drawable.logo), // Placeholder image
                         contentDescription = null,
                         modifier = Modifier
                             .size(100.dp)
@@ -140,7 +140,7 @@ fun ProfileScreen(navController: NavHostController, profile: UserEntity,
                             .background(Color.White, shape = CircleShape)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_launcher_background), // Replace with actual edit icon
+                            painter = painterResource(id = R.drawable.logo), // Replace with actual edit icon
                             contentDescription = "Edit Image",
                             tint = Color.Black
                         )

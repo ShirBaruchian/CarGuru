@@ -1,8 +1,16 @@
 package com.example.carguru.ui.screens
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.ui.draw.clip
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
@@ -12,7 +20,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -23,6 +33,9 @@ import com.example.carguru.ui.components.CarDropdowns
 import com.example.carguru.utils.hideKeyboard
 import com.example.carguru.viewmodels.AddReviewViewModel
 import com.example.carguru.viewmodels.CarRepository
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,16 +54,33 @@ fun AddReviewScreen(
     var rating by remember { mutableStateOf(0) }
     var reviewText by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var imageBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+    LaunchedEffect(imageUri) {
+        imageUri?.let {
+            imageBitmap = withContext(Dispatchers.IO) {
+                Picasso.get().load(it).resize(100, 100).centerCrop().get()
+            }
+        }
+    }
 
     val onAddReviewClicked = {
         if (title.isNotEmpty() && modelsState.selected.value.isNotEmpty()
             && makesState.selected.value.isNotEmpty() &&
-            yearsState.selected.value.isNotEmpty() && rating > 0 && reviewText.isNotEmpty()) {
+            yearsState.selected.value.isNotEmpty() && rating > 0 && reviewText.isNotEmpty()
+        ) {
             addReviewViewModel.addReview(
                 title, makesState.selected.value,
                 modelsState.selected.value,
                 yearsState.selected.value,
-                trimsState.selected.value, rating, reviewText
+                trimsState.selected.value, rating, reviewText, imageUri
             ) { error ->
                 if (error != null) {
                     errorMessage = error
@@ -83,8 +113,7 @@ fun AddReviewScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
+                .fillMaxSize().pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         focusManager.clearFocus()
                         hideKeyboard(context)
@@ -122,17 +151,44 @@ fun AddReviewScreen(
                     .height(150.dp)
                     .padding(bottom = 16.dp)
             )
-            Button(
-                onClick = onAddReviewClicked,
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable {
+                        imagePickerLauncher.launch("image/*")
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                Text("Add Review")
+                imageBitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "Selected Image",
+                        modifier = Modifier.clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } ?: run {
+                    Text("Select Image", color = MaterialTheme.colorScheme.onPrimary)
+                }
             }
-            if (errorMessage.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onAddReviewClicked, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = onAddReviewClicked,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                ) {
+                    Text("Add Review")
+                }
+                if (errorMessage.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }

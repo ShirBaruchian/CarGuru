@@ -94,19 +94,15 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     private fun updateProfileImage(uri: Uri, userId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val profileImageRef = storageReference.child("profileImages/${userId}.jpg")
-        Log.d("UserViewModel", "Uploading image to: ${profileImageRef.path}")
         profileImageRef.putFile(uri)
             .addOnSuccessListener {
-                Log.d("UserViewModel", "Image upload successful")
                 profileImageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
                     updateUserDetails(userId, downloadUrl.toString(), userName.value, onSuccess, onFailure)
-                }.addOnFailureListener { exception ->
-                    Log.e("UserViewModel", "Failed to get download URL", exception)
+                }.addOnFailureListener {
                     onFailure("Failed to get download URL")
                 }
             }
-            .addOnFailureListener { exception ->
-                Log.e("UserViewModel", "Image upload failed", exception)
+            .addOnFailureListener {
                 onFailure("Failed to upload profile image")
             }
     }

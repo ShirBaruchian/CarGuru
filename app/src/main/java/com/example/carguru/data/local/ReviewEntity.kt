@@ -17,5 +17,6 @@ data class ReviewEntity(
     val text: String = "",
     val userId: String= "",
     val timestamp: Date? = Date(),
-    val lastUpdated: Date = Date()
+    val lastUpdated: Date = Date(),
+    val imageUrl: String? = ""
 )

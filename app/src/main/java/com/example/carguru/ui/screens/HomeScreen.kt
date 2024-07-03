@@ -1,35 +1,35 @@
 package com.example.carguru.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material3.*
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Menu
+import java.util.Locale
+import java.text.SimpleDateFormat
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.carguru.models.ReviewWithUser
-import com.example.carguru.viewmodels.ReviewsViewModel
-import com.example.carguru.viewmodels.UserViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
+import androidx.compose.material3.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
-import com.example.carguru.viewmodels.CarRepository
-import com.example.carguru.services.DropdownState
-import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import com.example.carguru.ui.components.CarFilterDialog
+import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.items
+import com.example.carguru.models.ReviewWithUser
+import com.example.carguru.services.DropdownState
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.foundation.lazy.LazyColumn
+import com.example.carguru.viewmodels.UserViewModel
+import com.example.carguru.viewmodels.CarRepository
 import com.example.carguru.ui.components.ReviewFilter
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.carguru.viewmodels.ReviewsViewModel
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.AccountBox
+import com.example.carguru.ui.components.CarFilterDialog
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -185,28 +185,13 @@ fun HomeScreen(
 }
 
 @Composable
-fun TrimCard(name: String, rating: Float, reviews: Int) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = name, style = MaterialTheme.typography.bodySmall)
-            Text(text = "$rating/5", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "$reviews Reviews", style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-}
-
-@Composable
 fun CompactReviewItem(
     reviewWithUser: ReviewWithUser,
     navController: NavController
 ) {
     val dateFormat = remember { SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm:ss a", Locale.getDefault()) }
     val formattedDate = reviewWithUser.review.timestamp?.let { dateFormat.format(it) } ?: "Unknown"
+
 
     Card(
         shape = RoundedCornerShape(8.dp),
