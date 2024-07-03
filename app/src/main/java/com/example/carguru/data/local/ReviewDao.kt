@@ -25,7 +25,7 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE id = :reviewId")
     fun getReviewById(reviewId: String): Flow<ReviewEntity?>
 
-    @Query("SELECT * FROM reviews")
+    @Query("SELECT * FROM reviews ORDER BY timestamp DESC")
     fun getAllReviews(): Flow<List<ReviewEntity>>
 
     @Query("DELETE FROM reviews WHERE id = :reviewId")
