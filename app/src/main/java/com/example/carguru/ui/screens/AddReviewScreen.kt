@@ -35,6 +35,8 @@ import com.example.carguru.viewmodels.AddReviewViewModel
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Add
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -159,10 +161,12 @@ fun AddReviewScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
+
                     modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(24.dp))
                         .background(MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 16.dp)
                         .clickable {
                             imagePickerLauncher.launch("image/*")
                         },
@@ -182,11 +186,19 @@ fun AddReviewScreen(
                 Button(
                     onClick = onAddReviewClicked,
                     modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(24.dp)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 8.dp
+                    )
                 ) {
-                    Text("Add Review", color = Color.White)
+                    Text("Add", color = MaterialTheme.colorScheme.onPrimary)
+
                 }
             }
             if (errorMessage.isNotEmpty()) {

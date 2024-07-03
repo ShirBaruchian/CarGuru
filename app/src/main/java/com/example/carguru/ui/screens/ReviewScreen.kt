@@ -33,6 +33,7 @@ import com.example.carguru.viewmodels.ReviewsViewModel
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.material.icons.filled.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +74,7 @@ fun ReviewDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Review Details") },
+                title = { if (isEditMode) Text("Review Details") else Text("Edit Review") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -82,7 +83,7 @@ fun ReviewDetailScreen(
                 actions = {
                     if (currentUser?.uid == reviewWithUser?.review?.userId) {
                         IconButton(onClick = { isEditMode = !isEditMode }) {
-                            Icon(if (isEditMode) Icons.Default.Close else Icons.Default.Build, contentDescription = null)
+                            Icon(if (isEditMode) Icons.Default.Close else Icons.Default.Edit, contentDescription = null)
                         }
                     }
                 },
@@ -118,6 +119,7 @@ fun ReviewDetailScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(top = 8.dp)
                             .height(200.dp)
                             .clip(MaterialTheme.shapes.medium)
                             .clickable { imagePickerLauncher.launch("image/*") },
