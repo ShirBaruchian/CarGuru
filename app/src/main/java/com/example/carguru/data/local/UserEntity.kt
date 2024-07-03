@@ -7,9 +7,9 @@ import java.util.Date
 @Entity(tableName = "users")
 data class UserEntity(
     @PrimaryKey val id: String,
-    val username: String,
-    val email: String,
-    val password: String,
-    val lastUpdated: Date,
-    val profileImageUrl: String
+    val username: String = "",
+    val email: String = "",
+    val password: String = "",
+    val lastUpdated: Date = Date(),
+    val profileImageUrl: String = ""
 )

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +29,7 @@ import androidx.navigation.NavController
 import com.example.carguru.R
 import com.example.carguru.models.ReviewWithUser
 import com.example.carguru.viewmodels.ReviewsViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,6 +50,8 @@ fun ReviewDetailScreen(
     var editedImageUri by remember { mutableStateOf<Uri?>(null) }
     var editedImageBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     val context = LocalContext.current
+
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -77,8 +82,10 @@ fun ReviewDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { isEditMode = !isEditMode }) {
-                        Icon(if (isEditMode) Icons.Default.ArrowBack else Icons.Default.ArrowBack, contentDescription = null)
+                    if (currentUser?.uid == reviewWithUser?.review?.userId) {
+                        IconButton(onClick = { isEditMode = !isEditMode }) {
+                            Icon(if (isEditMode) Icons.Default.Close else Icons.Default.Build, contentDescription = null)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -147,7 +154,7 @@ fun ReviewDetailScreen(
                                 )
                             } ?: run {
                                 Image(
-                                    painter = painterResource(id = R.drawable.ic_launcher_background), // Placeholder image
+                                    painter = painterResource(id = R.drawable.logo), // Placeholder image
                                     contentDescription = "Review Image",
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
@@ -182,7 +189,7 @@ fun ReviewDetailScreen(
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
-                if (isEditMode) {
+                if (isEditMode && currentUser?.uid == review.review.userId) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Row {
                         Button(onClick = {

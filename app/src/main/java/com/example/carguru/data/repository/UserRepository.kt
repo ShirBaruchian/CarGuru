@@ -28,15 +28,8 @@ class UserRepository(
         firebaseUserService.addUserListener { users ->
             CoroutineScope(Dispatchers.IO).launch {
                 isUpdatingFromFirebase = true
-                val localUsers = userDao.getAllUsers().first()
-                val usersToUpdate = users.filter { remoteUser ->
-                    val localUser = localUsers.find { it.id == remoteUser.id }
-                    localUser == null || localUser != remoteUser.toUserEntity()
-                }
-                if (usersToUpdate.isNotEmpty()) {
-                    Log.d("UserRepository", "Updating users from Firebase")
-                    updateLocalDatabase(usersToUpdate.map { it.toUserEntity() })
-                }
+                Log.d("UserRepository", "Updating users from Firebase")
+                updateLocalDatabase(users.map { it.toUserEntity() })
                 isUpdatingFromFirebase = false
             }
         }

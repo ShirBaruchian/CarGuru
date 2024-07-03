@@ -39,8 +39,11 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewViewModel = viewModel(),
-                    carRepository: CarRepository) {
+fun AddReviewScreen(
+    navController: NavController,
+    addReviewViewModel: AddReviewViewModel = viewModel(),
+    carRepository: CarRepository
+) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     var title by remember { mutableStateOf("") }
@@ -71,7 +74,8 @@ fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewV
     val onAddReviewClicked = {
         if (title.isNotEmpty() && modelsState.selected.value.isNotEmpty()
             && makesState.selected.value.isNotEmpty() &&
-            yearsState.selected.value.isNotEmpty() && rating > 0 && reviewText.isNotEmpty()) {
+            yearsState.selected.value.isNotEmpty() && rating > 0 && reviewText.isNotEmpty()
+        ) {
             addReviewViewModel.addReview(
                 title, makesState.selected.value,
                 modelsState.selected.value,
@@ -117,16 +121,17 @@ fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewV
                 }
                 .padding(innerPadding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
         ) {
             TextField(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Title") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
             CarDropdowns(
                 yearsState = yearsState,
                 makesState = makesState,
@@ -134,14 +139,17 @@ fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewV
                 trimsState = trimsState,
                 carRepository
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             RatingBar(rating = rating) { newRating -> rating = newRating }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             TextField(
                 value = reviewText,
                 onValueChange = { reviewText = it },
                 label = { Text("Review") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .padding(bottom = 16.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -169,11 +177,18 @@ fun AddReviewScreen(navController: NavController, addReviewViewModel: AddReviewV
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onAddReviewClicked, modifier = Modifier.fillMaxWidth()) {
-                Text("Add Review")
-            }
-            if (errorMessage.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
+                Button(
+                    onClick = onAddReviewClicked,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                ) {
+                    Text("Add Review")
+                }
+                if (errorMessage.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }
