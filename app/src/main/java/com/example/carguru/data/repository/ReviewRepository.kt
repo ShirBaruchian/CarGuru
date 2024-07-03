@@ -54,7 +54,6 @@ class ReviewRepository(
         reviewDao.insertReview(review)
         firebaseReviewService.updateReview(review.toReview())
     }
-
     suspend fun syncReviews() = withContext(Dispatchers.IO) {
         val lastUpdateDate = reviewDao.getLatestUpdateDate() ?: Date(0) // Default to epoch if no date
 
