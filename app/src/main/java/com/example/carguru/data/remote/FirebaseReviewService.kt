@@ -1,10 +1,10 @@
 package com.example.carguru.data.remote
 
+import java.util.Date
+import kotlinx.coroutines.tasks.await
 import com.example.carguru.data.model.Review
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import kotlinx.coroutines.tasks.await
-import java.util.Date
 
 class FirebaseReviewService {
     private val firestore = FirebaseFirestore.getInstance()
@@ -22,15 +22,6 @@ class FirebaseReviewService {
                     onReviewsChanged(reviews)
                 }
             }
-    }
-
-    suspend fun getReview(reviewId: String): Review? {
-        val reviewSnapshot = firestore.collection("reviews").document(reviewId).get().await()
-        return reviewSnapshot.toObject(Review::class.java)
-    }
-
-    suspend fun saveReview(review: Review) {
-        firestore.collection("reviews").document(review.id).set(review).await()
     }
 
     suspend fun getAllReviews(since: Date? = null): List<Review> {
@@ -61,7 +52,4 @@ class FirebaseReviewService {
         firestore.collection("reviews").document(review.id).set(review).await()
     }
 
-    suspend fun deleteReview(reviewId: String) {
-        firestore.collection("reviews").document(reviewId).delete().await()
-    }
 }

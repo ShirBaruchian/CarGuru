@@ -1,9 +1,9 @@
 package com.example.carguru.utils
 
-import com.example.carguru.data.local.ReviewEntity
-import com.example.carguru.data.local.UserEntity
-import com.example.carguru.data.model.*
 import java.util.Date
+import com.example.carguru.data.model.*
+import com.example.carguru.data.local.UserEntity
+import com.example.carguru.data.local.ReviewEntity
 
 fun UserEntity.toUser(): User {
     return User(

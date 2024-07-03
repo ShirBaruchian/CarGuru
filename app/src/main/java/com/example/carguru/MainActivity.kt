@@ -1,9 +1,9 @@
 package com.example.carguru
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import androidx.room.Room
 import androidx.navigation.NavType
-import androidx.activity.viewModels
+import android.annotation.SuppressLint
 import androidx.navigation.navArgument
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import com.example.carguru.ui.screens.HomeScreen
 import com.example.carguru.ui.theme.CarGuruTheme
 import com.example.carguru.ui.screens.LoginScreen
+import com.example.carguru.data.local.AppDatabase
 import com.example.carguru.ui.screens.SignUpScreen
 import com.example.carguru.ui.screens.ProfileScreen
 import com.example.carguru.viewmodels.CarRepository
@@ -22,15 +23,13 @@ import com.example.carguru.viewmodels.LoginViewModel
 import com.example.carguru.viewmodels.SignUpViewModel
 import com.example.carguru.ui.screens.AddReviewScreen
 import com.example.carguru.viewmodels.ReviewsViewModel
-import com.example.carguru.ui.screens.ReviewDetailScreen
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
-import com.example.carguru.data.local.AppDatabase
-import com.example.carguru.data.remote.FirebaseReviewService
+import com.example.carguru.viewmodels.AddReviewViewModel
+import com.example.carguru.ui.screens.ReviewDetailScreen
+import com.example.carguru.data.repository.UserRepository
 import com.example.carguru.data.remote.FirebaseUserService
 import com.example.carguru.data.repository.ReviewRepository
-import com.example.carguru.data.repository.UserRepository
-import com.example.carguru.viewmodels.AddReviewViewModel
+import com.example.carguru.data.remote.FirebaseReviewService
 
 class MainActivity : ComponentActivity() {
     private val firebaseAuth = FirebaseAuth.getInstance()
@@ -59,7 +58,7 @@ class MainActivity : ComponentActivity() {
         val reviewRepository = ReviewRepository(database.reviewDao(), firebaseReviewService, userRepository)
 
         userViewModel = UserViewModel(userRepository)
-        reviewsViewModel = ReviewsViewModel(reviewRepository, userRepository)
+        reviewsViewModel = ReviewsViewModel(reviewRepository)
         loginViewModel = LoginViewModel(userRepository)
         signUpViewModel = SignUpViewModel(userRepository)
         addReviewViewModel = AddReviewViewModel(reviewRepository)

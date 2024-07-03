@@ -1,26 +1,22 @@
 package com.example.carguru.viewmodels
 
+import java.util.Date
 import android.net.Uri
 import android.util.Log
+import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
-import com.example.carguru.data.model.User
-import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.first
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.StateFlow
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.carguru.data.local.UserEntity
-import com.example.carguru.data.repository.UserRepository
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.util.Date
+import com.example.carguru.data.repository.UserRepository
 
 class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
-    private val firestore = FirebaseFirestore.getInstance()
+
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
 
@@ -72,7 +68,7 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
             }
         }
     }
-    fun updateUserDetails(userId: String, profileImageUrl: String, newUsername: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    private fun updateUserDetails(userId: String, profileImageUrl: String, newUsername: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             try {
                 val user = userRepository.getUser(userId).first()

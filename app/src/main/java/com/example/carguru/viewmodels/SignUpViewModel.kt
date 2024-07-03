@@ -2,29 +2,20 @@ package com.example.carguru.viewmodels
 
 import java.util.Date
 import android.net.Uri
-import android.util.Log
-import java.util.Locale
-import java.util.Calendar
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import com.example.carguru.data.model.User
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import androidx.compose.runtime.mutableStateOf
+import com.example.carguru.data.local.UserEntity
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import androidx.lifecycle.viewModelScope
-import com.example.carguru.data.local.UserEntity
-import com.example.carguru.data.repository.UserRepository
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.UserProfileChangeRequest
-import kotlinx.coroutines.launch
+import com.example.carguru.data.repository.UserRepository
 
 class SignUpViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
 
     var email = mutableStateOf("")

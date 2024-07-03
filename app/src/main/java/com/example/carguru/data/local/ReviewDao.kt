@@ -1,13 +1,12 @@
 package com.example.carguru.data.local
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Transaction
-import com.example.carguru.data.local.ReviewEntity
-import kotlinx.coroutines.flow.Flow
 import java.util.Date
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Insert
+import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface ReviewDao {

@@ -1,19 +1,18 @@
 package com.example.carguru.viewmodels
+
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.carguru.data.repository.ReviewRepository
-import com.example.carguru.data.repository.UserRepository
-import com.example.carguru.models.ReviewWithUser
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.tasks.await
+import androidx.lifecycle.viewModelScope
+import com.example.carguru.models.ReviewWithUser
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.firestore.FirebaseFirestore
+import com.example.carguru.data.repository.ReviewRepository
 
-class ReviewsViewModel(private val reviewRepository: ReviewRepository,
-                       private val userRepository: UserRepository
+class ReviewsViewModel(private val reviewRepository: ReviewRepository
 ) : ViewModel() {
     private var _loading = MutableStateFlow(false)
     var loading = _loading.asStateFlow()
