@@ -36,6 +36,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReviewScreen(
@@ -112,7 +113,8 @@ fun AddReviewScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize().pointerInput(Unit) {
+                .fillMaxSize()
+                .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         focusManager.clearFocus()
                         hideKeyboard(context)
@@ -151,43 +153,45 @@ fun AddReviewScreen(
                     .padding(bottom = 16.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable {
-                        imagePickerLauncher.launch("image/*")
-                    },
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                imageBitmap?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = "Selected Image",
-                        modifier = Modifier.clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } ?: run {
-                    Text("Select Image", color = MaterialTheme.colorScheme.onPrimary)
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable {
+                            imagePickerLauncher.launch("image/*")
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    imageBitmap?.let {
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = "Selected Image",
+                            modifier = Modifier.clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } ?: run {
+                        Text("Select Image", color = MaterialTheme.colorScheme.onPrimary)
+                    }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onAddReviewClicked, modifier = Modifier.fillMaxWidth()) {
                 Button(
                     onClick = onAddReviewClicked,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Add Review")
+                    Text("Add Review", color = Color.White)
                 }
-                if (errorMessage.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
-                }
+            }
+            if (errorMessage.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
             }
         }
     }
