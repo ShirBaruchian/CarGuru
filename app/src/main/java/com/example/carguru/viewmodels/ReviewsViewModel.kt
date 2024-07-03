@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.tasks.await
 import androidx.lifecycle.viewModelScope
-import com.example.carguru.models.ReviewWithUser
+import com.example.carguru.data.model.ReviewWithUser
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.carguru.data.repository.ReviewRepository

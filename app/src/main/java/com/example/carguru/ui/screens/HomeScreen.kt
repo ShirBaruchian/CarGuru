@@ -16,7 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.items
-import com.example.carguru.models.ReviewWithUser
+import com.example.carguru.data.model.ReviewWithUser
 import com.example.carguru.services.DropdownState
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu

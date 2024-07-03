@@ -1,4 +1,4 @@
-package com.example.carguru.models
+package com.example.carguru.data.model
 
 import com.example.carguru.data.local.ReviewEntity
 
